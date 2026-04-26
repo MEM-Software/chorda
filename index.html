@@ -2087,6 +2087,8 @@ function showPage(id,btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(btn) btn.classList.add('active');
+  document.body.style.overflow = (id === 'metro') ? 'hidden' : '';
+  window.scrollTo(0,0);
 }
 
 function showMsg(page,msg){
