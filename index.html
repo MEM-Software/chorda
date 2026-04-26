@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chorda</title>
+<meta name="description" content="Accordi, progressioni armoniche e metronomo per chitarristi. Funziona offline.">
+<meta name="author" content="Alessandro Rocca · MEM Software">
+<meta name="theme-color" content="#e8b84b">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d0f;--surface:#131316;--surface2:#1c1c22;
+  --border:#2a2a35;--accent:#e8b84b;--accent2:#4bbce8;
+  --accent3:#e8824b;--text:#e8e4dc;--text2:#b0adaa;--text3:#72717a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,13,15,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--accent);display:flex;align-items:center;gap:.5rem;}
+.logo span{color:var(--text2);font-size:.62rem;letter-spacing:4px;line-height:1.3;}
+nav{display:flex;}
+.nav-btn{background:none;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;color:var(--text2);padding:.5rem 1.5rem;border-bottom:2px solid transparent;transition:all .2s;position:relative;top:1px;}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-btn:hover{color:var(--text);}
+.page{display:none;padding:80px 1.5rem 4rem;max-width:1300px;margin:0 auto;}
+.page.active{display:block;}
+.hero{display:flex;flex-direction:column;align-items:center;padding:2.5rem 0 2rem;}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,4.5rem);letter-spacing:8px;line-height:1;text-align:center;margin-bottom:.25rem;}
+.page-sub{font-family:'Crimson Pro',serif;font-style:italic;color:var(--text3);font-size:1rem;margin-bottom:2rem;}
+.note-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem;max-width:560px;margin-bottom:1.2rem;}
+.note-btn{width:62px;height:62px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.note-btn .nm{font-size:1.05rem;color:var(--text);}
+.note-btn .na{font-size:.62rem;color:var(--text3);}
+.note-btn:hover{border-color:var(--accent);background:rgba(232,184,75,.06);}
+.note-btn.sel{background:var(--accent);border-color:var(--accent);}
+.note-btn.sel .nm,.note-btn.sel .na{color:#0d0d0f;}
+.key-selector{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:640px;}
+.key-row{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem;}
+.key-btn{width:58px;height:52px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Mono',monospace;font-size:.85rem;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.key-btn .km{font-size:1rem;color:var(--text);}
+.key-btn .ka{font-size:.58rem;color:var(--text3);}
+.key-btn:hover{border-color:var(--accent);background:rgba(232,184,75,.06);}
+.key-btn.sel{background:var(--accent);border-color:var(--accent);}
+.key-btn.sel .km,.key-btn.sel .ka{color:#0d0d0f;}
+.mode-row{display:flex;gap:.5rem;margin-top:.25rem;}
+.mode-btn{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;padding:.4rem 1.2rem;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;transition:all .15s;}
+.mode-btn.sel{background:var(--surface2);border-color:var(--text2);color:var(--text);}
+.mode-btn:hover{border-color:var(--text2);color:var(--text);}
+.sel-display{font-size:.72rem;letter-spacing:2px;color:var(--text2);min-height:1.2em;margin-bottom:.4rem;}
+.analyze-btn{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:4px;background:none;border:1px solid var(--accent);color:var(--accent);padding:.7rem 3rem;cursor:pointer;transition:all .2s;margin-top:.5rem;}
+.analyze-btn:hover{background:var(--accent);color:#0d0d0f;}
+.filter-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.2rem;}
+.ftab{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);transition:all .15s;}
+.ftab.active{background:var(--surface2);color:var(--text);border-color:var(--text3);}
+.ftab:hover{border-color:var(--text2);color:var(--text);}
+.results-count{font-size:.63rem;letter-spacing:2px;color:var(--text3);margin-bottom:.8rem;}
+.scales-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;}
+.scale-card{background:var(--surface);border:1px solid var(--border);padding:1.2rem 1.4rem;transition:border-color .2s;animation:fadeUp .3s ease forwards;opacity:0;}
+.scale-card:hover{border-color:var(--accent);}
+.scale-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;}
+.scale-name{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:3px;}
+.scat{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;padding:2px 7px;border:1px solid;}
+.scat-basic{color:var(--accent);border-color:var(--accent);}
+.scat-modal{color:var(--accent2);border-color:var(--accent2);}
+.scat-exotic{color:var(--accent3);border-color:var(--accent3);}
+.scat-jazz{color:#9eb0c8;border-color:#9eb0c8;}
+.scat-penta{color:#7ec896;border-color:#7ec896;}
+.scale-notes{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem;}
+.snote{font-size:.75rem;padding:2px 7px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+.snote.root{background:rgba(232,184,75,.15);border-color:var(--accent);color:var(--accent);}
+.scale-formula{font-size:.62rem;color:var(--text3);letter-spacing:1px;margin-bottom:.4rem;}
+.scale-desc{font-family:'Crimson Pro',serif;font-size:.85rem;color:var(--text2);line-height:1.5;}
+.fb-wrap{margin-top:.75rem;overflow-x:auto;}
+.chords-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:1rem;}
+.chord-card{background:var(--surface);border:1px solid var(--border);padding:.9rem;text-align:center;transition:border-color .2s,transform .2s;animation:fadeUp .3s ease forwards;opacity:0;cursor:pointer;}
+.chord-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.chord-name{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:3px;margin-bottom:.15rem;}
+.chord-type{font-size:.62rem;letter-spacing:2px;color:var(--text3);margin-bottom:.6rem;}
+.chord-degree{display:inline-block;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:1px;padding:2px 7px;border-radius:2px;margin-bottom:.5rem;font-weight:500;}
+.deg-I   {background:rgba(232,184,75,.18);color:#e8b84b;border:1px solid rgba(232,184,75,.4);}
+.deg-II  {background:rgba(75,188,232,.12);color:#4bbce8;border:1px solid rgba(75,188,232,.35);}
+.deg-III {background:rgba(75,188,232,.12);color:#4bbce8;border:1px solid rgba(75,188,232,.35);}
+.deg-IV  {background:rgba(78,200,120,.12);color:#4ec878;border:1px solid rgba(78,200,120,.35);}
+.deg-V   {background:rgba(232,130,75,.18);color:#e8824b;border:1px solid rgba(232,130,75,.4);}
+.deg-VI  {background:rgba(75,188,232,.12);color:#4bbce8;border:1px solid rgba(75,188,232,.35);}
+.deg-VII {background:rgba(180,75,232,.12);color:#b44be8;border:1px solid rgba(180,75,232,.35);}
+.chord-notes-row{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;margin-top:.4rem;}
+.cnpill{font-size:.58rem;padding:1px 5px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);}
+.finger-legend{display:flex;align-items:center;gap:1.2rem;margin-bottom:1.2rem;padding:.6rem 1rem;background:var(--surface);border:1px solid var(--border);flex-wrap:wrap;}
+.fl-title{font-size:.62rem;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+.fl-item{display:flex;align-items:center;gap:5px;}
+.fl-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0a0a0c;font-family:'DM Mono',monospace;}
+.fl-lbl{font-size:.68rem;color:var(--text2);}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);padding:2rem;max-width:720px;width:94%;max-height:88vh;overflow-y:auto;position:relative;animation:fadeUp .2s ease;}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;color:var(--text3);font-size:1.1rem;font-family:'DM Mono',monospace;}
+.modal-close:hover{color:var(--text);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;margin-bottom:.2rem;}
+.modal-sub{font-size:.68rem;letter-spacing:2px;color:var(--text3);margin-bottom:1.2rem;}
+.voicings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:1rem;margin-top:.8rem;}
+.voicing-item{text-align:center;}
+.voicing-lbl{font-size:.6rem;letter-spacing:2px;color:var(--text3);margin-bottom:.4rem;}
+.empty{text-align:center;padding:4rem 2rem;color:var(--text3);}
+.empty .icon{font-size:3.5rem;margin-bottom:1rem;opacity:.3;}
+.empty p{font-family:'Crimson Pro',serif;font-style:italic;font-size:1.05rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PROGRESSIONI ── */
+.prog-genre-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.5rem;}
+.prog-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;color:var(--text);margin:2rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1.2rem;margin-bottom:1.5rem;}
+.prog-card{background:var(--surface);border:1px solid var(--border);padding:1.3rem 1.5rem;transition:border-color .2s;animation:fadeUp .3s ease forwards;opacity:0;}
+.prog-card:hover{border-color:var(--accent);}
+.prog-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;gap:.8rem;}
+.prog-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--text);}
+.prog-genre-badge{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.genre-classic {color:#e8b84b;border-color:#e8b84b;}
+.genre-pop     {color:#4be88a;border-color:#4be88a;}
+.genre-rock    {color:#e8824b;border-color:#e8824b;}
+.genre-jazz    {color:#4bbce8;border-color:#4bbce8;}
+.genre-blues   {color:#c87ee8;border-color:#c87ee8;}
+.genre-exotic  {color:#e84b8a;border-color:#e84b8a;}
+.genre-soul    {color:#e8c44b;border-color:#e8c44b;}
+.genre-reggae  {color:#4be8a0;border-color:#4be8a0;}
+.genre-latin   {color:#e84b6a;border-color:#e84b6a;}
+.genre-metal   {color:#8a8aaa;border-color:#8a8aaa;}
+.genre-country {color:#d4a86a;border-color:#d4a86a;}
+.genre-film    {color:#7aa4c8;border-color:#7aa4c8;}
+.prog-degrees{display:flex;align-items:center;gap:.3rem;margin-bottom:.75rem;flex-wrap:wrap;}
+.prog-deg-chip{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;padding:.2rem .55rem;border:1px solid;}
+.prog-arrow{color:var(--text3);font-size:.8rem;margin:0 .1rem;}
+.prog-chords-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:flex-end;}
+.prog-chord-item{text-align:center;}
+.prog-chord-label{font-size:.62rem;letter-spacing:1px;color:var(--text2);margin-bottom:.3rem;}
+.prog-desc{font-family:'Crimson Pro',serif;font-size:.88rem;color:var(--text2);line-height:1.55;}
+.prog-examples{font-size:.65rem;color:var(--text3);margin-top:.4rem;letter-spacing:.5px;}
+.prog-examples span{color:var(--text2);}
+
+/* ── METRONOME ── */
+.metro-page{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6rem 1.5rem 3rem;min-height:100vh;gap:2rem;}
+.metro-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:8px;color:var(--text);text-align:center;}
+.metro-bpm-display{font-family:'Bebas Neue',sans-serif;font-size:7rem;line-height:1;color:var(--accent);letter-spacing:-2px;text-align:center;min-width:240px;}
+.metro-bpm-input{background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:2px;text-align:center;width:120px;padding:.4rem .6rem;outline:none;transition:border-color .2s;}
+.metro-bpm-input:focus{border-color:var(--accent);}
+.metro-bpm-input::-webkit-inner-spin-button,.metro-bpm-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.metro-slider-wrap{width:100%;max-width:480px;display:flex;flex-direction:column;gap:.6rem;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--surface2);border-radius:2px;outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #0d0d0f;box-shadow:0 0 8px rgba(232,184,75,.4);}
+.metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #0d0d0f;}
+.metro-slider-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:1px;}
+.metro-beats{display:flex;gap:.8rem;justify-content:center;margin:.5rem 0;}
+.metro-beat{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);transition:background .06s, border-color .06s, transform .06s;}
+.metro-beat.active{background:var(--accent);border-color:var(--accent);transform:scale(1.15);}
+.metro-beat.accent{border-color:var(--accent2);}
+.metro-beat.accent.active{background:var(--accent2);border-color:var(--accent2);}
+.metro-controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:center;}
+.metro-play-btn{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:4px;padding:.8rem 3rem;background:var(--accent);color:#0d0d0f;border:none;cursor:pointer;transition:opacity .15s, transform .1s;}
+.metro-play-btn:hover{opacity:.85;transform:scale(1.02);}
+.metro-play-btn.playing{background:var(--surface2);color:var(--accent);border:1px solid var(--accent);}
+.metro-tap-btn{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:.8rem 1.5rem;background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .15s;}
+.metro-tap-btn:hover{border-color:var(--text);color:var(--text);}
+.metro-tap-btn:active{background:var(--surface2);transform:scale(.97);}
+.metro-meter-row{display:flex;gap:.5rem;justify-content:center;}
+.metro-meter-btn{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:2px;padding:.4rem .9rem;background:none;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .15s;}
+.metro-meter-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(232,184,75,.08);}
+.metro-tempo-label{font-family:'Crimson Pro',serif;font-size:1rem;color:var(--text2);font-style:italic;min-height:1.4rem;text-align:center;}
+.metro-input-row{display:flex;align-items:center;gap:.8rem;}
+.metro-input-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:2px;color:var(--text3);}
+
+.chords-level-row{display:flex;gap:.5rem;justify-content:center;margin-top:1rem;}
+.level-btn{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:.45rem 1.6rem;background:none;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .18s;}
+.level-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(232,184,75,.08);}
+.level-btn:hover{border-color:var(--text2);color:var(--text2);}
+.tier-divider{grid-column:1/-1;display:flex;align-items:center;gap:1rem;margin:.6rem 0 .2rem;padding-top:.4rem;}
+.tier-divider span{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2px;color:var(--text3);white-space:nowrap;}
+.tier-divider::before,.tier-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.chord-tier-badge{font-size:.5rem;letter-spacing:1.5px;padding:1px 5px;vertical-align:middle;margin-left:.3rem;}
+.tier-1-badge{background:rgba(232,184,75,.15);color:#e8b84b;border:1px solid rgba(232,184,75,.3);}
+.tier-2-badge{background:rgba(75,188,232,.1);color:#4bbce8;border:1px solid rgba(75,188,232,.25);}
+.tier-3-badge{background:rgba(75,232,138,.08);color:#4be88a;border:1px solid rgba(75,232,138,.2);}
+.tier-4-badge{background:rgba(180,75,232,.08);color:#b44be8;border:1px solid rgba(180,75,232,.2);}
+.chord-role-hint{font-size:.62rem;color:var(--text3);font-family:'Crimson Pro',serif;font-style:italic;margin-top:.3rem;line-height:1.3;}
+
+@media(max-width:600px){.chords-grid{grid-template-columns:repeat(2,1fr);}header{padding:0 1rem;}.logo span{display:none;}.prog-grid{grid-template-columns:1fr;}.metro-bpm-display{font-size:5rem;}.metro-beat{width:40px;height:40px;}}
+
+/* ── INFO PAGE ── */
+.info-page{max-width:760px;margin:0 auto;padding:5rem 1.5rem 6rem;}
+.info-eyebrow{font-size:.62rem;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:1.2rem;display:block;}
+.info-hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,12vw,7rem);letter-spacing:10px;line-height:.9;color:var(--text);margin-bottom:.4rem;}
+.info-hero-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:1.15rem;color:var(--text3);margin-bottom:3.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+.info-section{margin-bottom:2.8rem;}
+.info-section-label{font-size:.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;display:block;}
+.info-section-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:4px;color:var(--text);margin-bottom:.7rem;}
+.info-body{font-family:'Crimson Pro',serif;font-size:1rem;color:var(--text2);line-height:1.75;}
+.info-feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.8rem;margin-top:1rem;}
+.info-feature{background:var(--surface);border:1px solid var(--border);padding:1rem 1.2rem;}
+.info-feature-icon{font-size:1.4rem;margin-bottom:.4rem;}
+.info-feature-name{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--text);margin-bottom:.2rem;}
+.info-feature-desc{font-family:'Crimson Pro',serif;font-size:.85rem;color:var(--text3);line-height:1.4;}
+.info-divider{height:1px;background:var(--border);margin:2.5rem 0;}
+.info-legal-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.2rem 1.5rem;margin-top:1rem;}
+.info-legal-text{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text3);line-height:1.7;letter-spacing:.5px;}
+.info-legal-text strong{color:var(--text2);}
+.info-meta-row{display:flex;flex-wrap:wrap;gap:2rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);}
+.info-meta-item{}
+.info-meta-key{font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:.25rem;}
+.info-meta-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--text);}
+.info-mem-badge{display:inline-block;margin-top:2.5rem;font-size:.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);padding:.35rem 1rem;}
+.info-mem-badge span{color:var(--accent);}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CHORDA<span>CHORD<br>BIBLE</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('chords',this)">Accordi</button>
+    <button class="nav-btn" onclick="showPage('prog',this)">Progressioni</button>
+    <button class="nav-btn" onclick="showPage('metro',this)">Metronomo</button>
+    <button class="nav-btn" onclick="showPage('info',this)">Info</button>
+  </nav>
+</header>
+
+<div class="page active" id="page-chords">
+  <div class="hero">
+    <div class="page-title">ACCORDI</div>
+    <div class="page-sub">Scegli tonalità e modo per vedere tutti gli accordi utilizzabili</div>
+    <div class="key-selector">
+      <div class="key-row" id="key-row"></div>
+      <div class="mode-row">
+        <button class="mode-btn sel" id="mode-major" onclick="selectMode('major')">Maggiore</button>
+        <button class="mode-btn" id="mode-minor" onclick="selectMode('minor')">Minore</button>
+      </div>
+    </div>
+    <div class="sel-display" id="sd-chords" style="margin-top:.8rem">nessuna tonalità selezionata</div>
+    <div class="chords-level-row">
+      <button class="level-btn sel" id="level-base" onclick="setChordsLevel('base',this)">BASE</button>
+      <button class="level-btn" id="level-full" onclick="setChordsLevel('full',this)">COMPLETO</button>
+    </div>
+    <button class="analyze-btn" onclick="analyzeChords()">MOSTRA ACCORDI</button>
+  </div>
+  <div id="chords-results"></div>
+</div>
+
+<!-- PROGRESSIONI PAGE -->
+<div class="page" id="page-prog">
+  <div class="hero">
+    <div class="page-title">PROGRESSIONI</div>
+    <div class="page-sub">Scegli tonalità e modo per scoprire le progressioni consigliate</div>
+    <div class="key-selector">
+      <div class="key-row" id="key-row-prog"></div>
+      <div class="mode-row">
+        <button class="mode-btn sel" id="prog-mode-major" onclick="selectProgMode('major')">Maggiore</button>
+        <button class="mode-btn" id="prog-mode-minor" onclick="selectProgMode('minor')">Minore</button>
+      </div>
+    </div>
+    <div class="sel-display" id="sd-prog" style="margin-top:.8rem">nessuna tonalità selezionata</div>
+    <button class="analyze-btn" onclick="analyzeProgressions()">MOSTRA PROGRESSIONI</button>
+  </div>
+  <div id="prog-results"></div>
+</div>
+
+
+<div class="page" id="page-metro">
+  <div class="metro-page">
+    <div class="metro-title">METRONOMO</div>
+
+    <div class="metro-tempo-label" id="metro-tempo-label">Moderato</div>
+
+    <div class="metro-bpm-display" id="metro-bpm-display">120</div>
+
+    <div class="metro-input-row">
+      <span class="metro-input-label">BPM</span>
+      <input class="metro-bpm-input" type="number" id="metro-bpm-input" value="120" min="20" max="300"
+        onchange="metroBpmFromInput(this.value)"
+        onkeydown="if(event.key==='Enter') metroBpmFromInput(this.value)">
+    </div>
+
+    <div class="metro-slider-wrap">
+      <input class="metro-slider" type="range" id="metro-slider"
+        min="20" max="300" value="120" oninput="metroBpmFromSlider(this.value)">
+      <div class="metro-slider-labels"><span>20</span><span>BPM</span><span>300</span></div>
+    </div>
+
+    <div class="metro-meter-row">
+      <button class="metro-meter-btn" onclick="metroSetMeter(2,this)">2/4</button>
+      <button class="metro-meter-btn" onclick="metroSetMeter(3,this)">3/4</button>
+      <button class="metro-meter-btn sel" onclick="metroSetMeter(4,this)" id="metro-meter-4">4/4</button>
+      <button class="metro-meter-btn" onclick="metroSetMeter(6,this)">6/8</button>
+    </div>
+
+    <div class="metro-beats" id="metro-beats"></div>
+
+    <div class="metro-controls">
+      <button class="metro-tap-btn" onclick="metroTap()">TAP</button>
+      <button class="metro-play-btn" id="metro-play-btn" onclick="metroToggle()">START</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="chord-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('chord-modal').classList.remove('open')">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── NOTE NAMES ──
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_ALT=['','D♭','','E♭','','','G♭','','A♭','','B♭',''];
+
+function ni(n){
+  n=String(n).replace('♯','#').replace('♭','b');
+  const map={'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
+  if(map[n]) n=map[n];
+  return NOTES.indexOf(n);
+}
+
+// ── SCALE DB ──
+const SCALES=[
+  {name:'Maggiore (Ionica)',       cat:'basic', f:[0,2,4,5,7,9,11], desc:'La scala fondamentale. Suono luminoso e positivo.'},
+  {name:'Minore Naturale',         cat:'basic', f:[0,2,3,5,7,8,10], desc:'Scala minore base. Malinconica e profonda.'},
+  {name:'Minore Armonica',         cat:'basic', f:[0,2,3,5,7,8,11], desc:'Minore col 7° alzato. Drammatica, tipica del classico e del metal.'},
+  {name:'Minore Melodica',         cat:'basic', f:[0,2,3,5,7,9,11], desc:'Minore con 6° e 7° alzati. Jazz e musica classica.'},
+  {name:'Pentatonica Maggiore',    cat:'penta', f:[0,2,4,7,9],      desc:'5 note della scala maggiore. Universale, suona bene ovunque.'},
+  {name:'Pentatonica Minore',      cat:'penta', f:[0,3,5,7,10],     desc:'La scala rock per eccellenza. Base del blues e hard rock.'},
+  {name:'Blues',                   cat:'penta', f:[0,3,5,6,7,10],   desc:'Pentatonica minore + blue note (♭5). Il suono del blues autentico.'},
+  {name:'Blues Maggiore',          cat:'penta', f:[0,2,3,4,7,9],    desc:'Pentatonica maggiore + ♭3. Suono country e blues luminoso.'},
+  {name:'Dorico',                  cat:'modal', f:[0,2,3,5,7,9,10], desc:'Minore con 6° alzato. Jazz e funk, meno tetro del minore naturale.'},
+  {name:'Frigio',                  cat:'modal', f:[0,1,3,5,7,8,10], desc:'Minore con 2° abbassato. Suono spagnolo e flamenco.'},
+  {name:'Lidio',                   cat:'modal', f:[0,2,4,6,7,9,11], desc:'Maggiore con 4° alzato. Etereo e sognante, usato nel film score.'},
+  {name:'Misolidio',               cat:'modal', f:[0,2,4,5,7,9,10], desc:'Maggiore con 7° abbassato. Blues-rock, rock classico.'},
+  {name:'Locrio',                  cat:'modal', f:[0,1,3,5,6,8,10], desc:'Il modo più dissonante. Metal e jazz estremo.'},
+  {name:'Lidio Dominante',         cat:'modal', f:[0,2,4,6,7,9,10], desc:'Lidio con 7° abbassato. Misterioso e sospeso.'},
+  {name:'Frigio Dominante',        cat:'modal', f:[0,1,4,5,7,8,10], desc:'Frigio con 3° maggiore. Mediorientale e flamenco.'},
+  {name:'Dorico ♯4',               cat:'modal', f:[0,2,3,6,7,9,10], desc:'Dorico con 4° aumentato. Suono ungherese/zigano.'},
+  {name:'Lidia Aumentata',         cat:'jazz',  f:[0,2,4,6,8,9,11], desc:'3° modo della melodica minore. Flottante e misterioso.'},
+  {name:'Alterata (Super Locria)', cat:'jazz',  f:[0,1,3,4,6,8,10], desc:'7° modo della melodica minore. Massima tensione su V7alt.'},
+  {name:'Bebop Dominante',         cat:'jazz',  f:[0,2,4,5,7,9,10,11],desc:'Classica scala jazz. Cromatismo per note sulle battute forti.'},
+  {name:'Bebop Minore',            cat:'jazz',  f:[0,2,3,5,7,8,9,11], desc:'Bebop per il minore. Tipica dei sassofonisti jazz.'},
+  {name:'Bebop Maggiore',          cat:'jazz',  f:[0,2,4,5,7,8,9,11], desc:'Maggiore con ♯5 aggiunto. Usata su accordi maj7.'},
+  {name:'Esatonale (Whole Tone)',  cat:'exotic',f:[0,2,4,6,8,10],   desc:'Solo toni interi. Impressionista e ambiguo alla Debussy.'},
+  {name:'Diminuita (S-T)',         cat:'exotic',f:[0,1,3,4,6,7,9,10],desc:'Simmetrica 8 note (semitono-tono). Su accordi dim7.'},
+  {name:'Diminuita (T-S)',         cat:'exotic',f:[0,2,3,5,6,8,9,11],desc:'Simmetrica 8 note (tono-semitono). Su accordi dominanti.'},
+  {name:'Ungherese Minore',        cat:'exotic',f:[0,2,3,6,7,8,11], desc:'Suono gitano e zingaresco. Molto caratteristica.'},
+  {name:'Ungherese Maggiore',      cat:'exotic',f:[0,3,4,6,7,9,10], desc:'Variante maggiore gitana. Esotica e orientale.'},
+  {name:'Araba (Hijaz)',           cat:'exotic',f:[0,1,4,5,7,8,10], desc:'Tipica della musica araba. Seconda aumentata caratteristica.'},
+  {name:'Giapponese (In)',         cat:'exotic',f:[0,1,5,7,8],      desc:'Pentatonica giapponese. Meditativa e orientale.'},
+  {name:'Napolitana Minore',       cat:'exotic',f:[0,1,3,5,7,8,11], desc:'Minore con 2° abbassato e 7° maggiore. Romantica e drammatica.'},
+  {name:'Enigmatica',              cat:'exotic',f:[0,1,4,6,8,10,11],desc:'Scala di Verdi. Molto cromatica e dissonante.'},
+];
+
+// ── CHORD DB ──
+const CHORDS=[
+  // Triadi
+  {name:'Maggiore',         suf:'',       type:'Triade',    cat:'basic', iv:[0,4,7],       desc:'La triade fondamentale. Suono positivo e conclusivo.'},
+  {name:'Minore',           suf:'m',      type:'Triade',    cat:'basic', iv:[0,3,7],       desc:'Triade minore. Suono malinconico e riflessivo.'},
+  {name:'Aumentato',        suf:'aug',    type:'Triade',    cat:'basic', iv:[0,4,8],       desc:'Triade aumentata. Sospesa e instabile, crea tensione.'},
+  {name:'Diminuito',        suf:'dim',    type:'Triade',    cat:'basic', iv:[0,3,6],       desc:'Triade diminuita. Molto tesa, accordo di passaggio.'},
+  {name:'Sus2',             suf:'sus2',   type:'Triade',    cat:'basic', iv:[0,2,7],       desc:'Sospeso sul 2°. Suono aperto e moderno.'},
+  {name:'Sus4',             suf:'sus4',   type:'Triade',    cat:'basic', iv:[0,5,7],       desc:'Sospeso sul 4°. Crea attesa e risoluzione.'},
+  {name:'Power Chord',      suf:'5',      type:'Triade',    cat:'basic', iv:[0,7],         desc:'Quinta pura senza terza. Rock e metal, ambiguità maj/min.'},
+  // Settime
+  {name:'Dominante 7°',     suf:'7',      type:'Settima',   cat:'basic', iv:[0,4,7,10],   desc:'L\'accordo di tensione per eccellenza. Risolve sulla tonica.'},
+  {name:'Maggiore 7°',      suf:'maj7',   type:'Settima',   cat:'basic', iv:[0,4,7,11],   desc:'Suono romantico e jazzistico. Pop e bossa nova.'},
+  {name:'Minore 7°',        suf:'m7',     type:'Settima',   cat:'basic', iv:[0,3,7,10],   desc:'Suono morbido e sofisticato. Jazz e R&B.'},
+  {name:'Semidiminuito ø',  suf:'m7b5',   type:'Settima',   cat:'jazz',  iv:[0,3,6,10],   desc:'Accordo di passaggio jazz tipico. Risolve sul V7.'},
+  {name:'Diminuito 7°',     suf:'dim7',   type:'Settima',   cat:'jazz',  iv:[0,3,6,9],    desc:'Completamente simmetrico. Jazz, blues e romanticismo.'},
+  {name:'Minore Mag. 7°',   suf:'mMaj7',  type:'Settima',   cat:'jazz',  iv:[0,3,7,11],   desc:'Minore con settima maggiore. Teso e drammatico.'},
+  {name:'7sus4',            suf:'7sus4',  type:'Settima',   cat:'basic', iv:[0,5,7,10],   desc:'Sospeso con settima. Suono funk e moderno.'},
+  {name:'Mag. 7° ♯5',      suf:'maj7#5', type:'Settima',   cat:'jazz',  iv:[0,4,8,11],   desc:'Maj7 con quinta aumentata. Misterioso e colorato.'},
+  // None
+  {name:'Dominante 9°',     suf:'9',      type:'Nona',      cat:'jazz',  iv:[0,4,7,10,14], desc:'Accordo ricco e pieno. Classico del funk e soul.'},
+  {name:'Maggiore 9°',      suf:'maj9',   type:'Nona',      cat:'jazz',  iv:[0,4,7,11,14], desc:'Molto colorato e morbido. Bossa nova e jazz.'},
+  {name:'Minore 9°',        suf:'m9',     type:'Nona',      cat:'jazz',  iv:[0,3,7,10,14], desc:'Suono ricco e vellutato. R&B moderno.'},
+  {name:'Dominante ♭9',     suf:'7b9',    type:'Nona',      cat:'jazz',  iv:[0,4,7,10,13], desc:'Tensione massima. Il preferito di Charlie Parker.'},
+  {name:'Dominante ♯9',     suf:'7#9',    type:'Nona',      cat:'jazz',  iv:[0,4,7,10,15], desc:'"Hendrix chord". Ambiguità maj/min. Blues-rock unico.'},
+  // Estese
+  {name:'♯11 (Lidia)',      suf:'maj9#11',type:'Estesa',    cat:'jazz',  iv:[0,4,7,11,14,18], desc:'Sonorità Lydian. Eterea e sospesa, jazz modale.'},
+  {name:'Tredicesima',      suf:'13',     type:'Estesa',    cat:'jazz',  iv:[0,4,7,10,14,21], desc:'L\'accordo più completo. Tipico del jazz.'},
+  {name:'Min. 11°',         suf:'m11',    type:'Estesa',    cat:'jazz',  iv:[0,3,7,10,14,17], desc:'Minore esteso all\'undicesima. Lussureggiante.'},
+  // Add / Sesta
+  {name:'Add9',             suf:'add9',   type:'Add/Sesta', cat:'basic', iv:[0,4,7,14],   desc:'Triade maggiore con nona. Ricco senza la settima.'},
+  {name:'Min. Add9',        suf:'madd9',  type:'Add/Sesta', cat:'basic', iv:[0,3,7,14],   desc:'Minore con nona. Pop alternativo.'},
+  {name:'Sesta',            suf:'6',      type:'Add/Sesta', cat:'basic', iv:[0,4,7,9],    desc:'Maggiore con sesta. Vintage e jazzistico.'},
+  {name:'Minore Sesta',     suf:'m6',     type:'Add/Sesta', cat:'basic', iv:[0,3,7,9],    desc:'Minore con sesta maggiore. Elegante e introspettivo.'},
+  {name:'6/9',              suf:'6/9',    type:'Add/Sesta', cat:'jazz',  iv:[0,4,7,9,14], desc:'Sesta con nona. Suono luminoso e completo.'},
+];
+
+// ── FINGERINGS DB ──
+// fr=[E,A,D,G,B,e]  null=silenziata  0=aperta
+// fi=[E,A,D,G,B,e]  1=indice 2=medio 3=anulare 4=mignolo
+// b={f:tasto_barre, s:stringa_inizio, e:stringa_fine}
+const FING={
+'C':     [{n:'Open',   fr:[null,3,2,0,1,0],  fi:[0,3,2,0,1,0]},
+          {n:'VIII',   fr:[8,10,10,9,8,8],   fi:[1,3,4,2,1,1], b:{f:8,s:0,e:5}}],
+'Cm':    [{n:'III',    fr:[null,3,5,5,4,3],  fi:[0,1,3,4,2,1], b:{f:3,s:1,e:5}}],
+'C7':    [{n:'Open',   fr:[null,3,2,3,1,0],  fi:[0,3,2,4,1,0]}],
+'Cmaj7': [{n:'Open',   fr:[null,3,2,0,0,0],  fi:[0,3,2,0,0,0]}],
+'Cm7':   [{n:'III',    fr:[null,3,5,3,4,3],  fi:[0,1,3,1,2,1], b:{f:3,s:1,e:5}}],
+'Cdim':  [{n:'Open',   fr:[null,3,4,5,4,null],fi:[0,1,2,4,3,0]}],
+'Cdim7': [{n:'Open',   fr:[null,3,4,2,4,null],fi:[0,2,3,1,4,0]}],
+'Caug':  [{n:'Open',   fr:[null,3,2,1,1,null],fi:[0,4,3,1,2,0]}],
+'Csus2': [{n:'Open',   fr:[null,3,0,0,1,3],  fi:[0,2,0,0,1,4]}],
+'Csus4': [{n:'Open',   fr:[null,3,3,0,1,1],  fi:[0,3,4,0,1,2]}],
+'C5':    [{n:'Open',   fr:[null,3,5,5,null,null],fi:[0,1,3,4,0,0]}],
+'Cadd9': [{n:'Open',   fr:[null,3,2,0,3,0],  fi:[0,3,2,0,4,0]}],
+'Cmadd9':[{n:'III',    fr:[null,3,5,5,4,3],  fi:[0,1,3,4,2,1], b:{f:3,s:1,e:5}}],
+'C6':    [{n:'Open',   fr:[null,3,2,2,1,0],  fi:[0,4,2,3,1,0]}],
+'Cm6':   [{n:'Open',   fr:[null,3,5,5,4,5],  fi:[0,1,2,3,1,4]}],
+'C6/9':  [{n:'Open',   fr:[null,3,2,2,3,3],  fi:[0,2,1,1,3,4]}],
+'Cmaj9': [{n:'Open',   fr:[null,3,0,0,0,0],  fi:[0,1,0,0,0,0]}],
+'C9':    [{n:'Open',   fr:[null,3,2,3,3,3],  fi:[0,2,1,3,4,4]}],
+'Cm9':   [{n:'III',    fr:[null,3,5,3,4,3],  fi:[0,1,3,1,2,1], b:{f:3,s:1,e:5}}],
+'CmMaj7':[{n:'Open',   fr:[null,3,5,4,4,3],  fi:[0,1,3,2,2,1]}],
+'Cmaj7#5':[{n:'Open',  fr:[null,3,2,1,1,null],fi:[0,4,3,1,2,0]}],
+'C7sus4':[{n:'Open',   fr:[null,3,3,3,1,1],  fi:[0,2,3,4,1,1]}],
+'C7b9':  [{n:'VIII',   fr:[8,9,10,9,8,8],   fi:[1,2,4,3,1,1], b:{f:8,s:0,e:5}}],
+'C7#9':  [{n:'VIII',   fr:[8,11,10,9,8,8],  fi:[1,4,3,2,1,1], b:{f:8,s:0,e:5}}],
+'Cm7b5': [{n:'III',    fr:[null,3,4,3,4,3],  fi:[0,1,2,1,3,1], b:{f:3,s:1,e:5}}],
+'Cmaj9#11':[{n:'Open', fr:[null,3,2,0,0,2],  fi:[0,3,2,0,0,4]}],
+'C13':   [{n:'VIII',   fr:[8,10,8,9,10,8],  fi:[1,3,1,2,4,1], b:{f:8,s:0,e:5}}],
+'Cm11':  [{n:'III',    fr:[null,3,5,3,4,6],  fi:[0,1,3,1,2,4]}],
+
+'D':     [{n:'Open',   fr:[null,null,0,2,3,2],fi:[0,0,0,1,3,2]},
+          {n:'V',      fr:[5,5,7,7,7,5],     fi:[1,1,3,4,2,1], b:{f:5,s:0,e:5}}],
+'Dm':    [{n:'Open',   fr:[null,null,0,2,3,1],fi:[0,0,0,2,3,1]},
+          {n:'V',      fr:[5,5,7,7,6,5],     fi:[1,1,3,4,2,1], b:{f:5,s:0,e:5}}],
+'D7':    [{n:'Open',   fr:[null,null,0,2,1,2],fi:[0,0,0,3,1,2]}],
+'Dmaj7': [{n:'Open',   fr:[null,null,0,2,2,2],fi:[0,0,0,1,1,1]}],
+'Dm7':   [{n:'Open',   fr:[null,null,0,2,1,1],fi:[0,0,0,2,1,1]}],
+'Ddim':  [{n:'Open',   fr:[null,null,0,1,3,1],fi:[0,0,0,1,3,2]}],
+'Ddim7': [{n:'Open',   fr:[null,null,0,1,0,1],fi:[0,0,0,1,0,2]}],
+'Daug':  [{n:'Open',   fr:[null,null,0,3,3,2],fi:[0,0,0,3,4,2]}],
+'Dsus2': [{n:'Open',   fr:[null,null,0,2,3,0],fi:[0,0,0,1,3,0]}],
+'Dsus4': [{n:'Open',   fr:[null,null,0,2,3,3],fi:[0,0,0,1,2,3]}],
+'D5':    [{n:'Open',   fr:[null,null,0,2,null,null],fi:[0,0,0,1,0,0]}],
+'Dadd9': [{n:'Open',   fr:[null,null,0,2,3,0],fi:[0,0,0,1,3,0]}],
+'Dmadd9':[{n:'Open',   fr:[null,null,0,2,3,1],fi:[0,0,0,1,3,1]}],
+'D6':    [{n:'Open',   fr:[null,null,0,2,0,2],fi:[0,0,0,1,0,2]}],
+'Dm6':   [{n:'Open',   fr:[null,null,0,2,0,1],fi:[0,0,0,2,0,1]}],
+'D6/9':  [{n:'Open',   fr:[null,null,0,2,0,0],fi:[0,0,0,1,0,0]}],
+'Dmaj9': [{n:'Open',   fr:[null,null,0,2,2,0],fi:[0,0,0,1,2,0]}],
+'D9':    [{n:'Open',   fr:[null,0,0,2,1,2],  fi:[0,0,0,3,1,4]}],
+'Dm9':   [{n:'V',      fr:[5,5,7,5,6,5],    fi:[1,1,3,1,2,1], b:{f:5,s:0,e:5}}],
+'DmMaj7':[{n:'Open',   fr:[null,null,0,2,2,1],fi:[0,0,0,2,3,1]}],
+'Dmaj7#5':[{n:'Open',  fr:[null,null,0,3,3,2],fi:[0,0,0,3,4,2]}],
+'D7sus4':[{n:'Open',   fr:[null,null,0,2,1,3],fi:[0,0,0,2,1,4]}],
+'D7b9':  [{n:'IV',     fr:[null,null,4,5,4,5],fi:[0,0,1,3,2,4]}],
+'D7#9':  [{n:'IV',     fr:[null,null,4,5,4,6],fi:[0,0,1,3,2,4]}],
+'Dm7b5': [{n:'Open',   fr:[null,null,0,1,1,1],fi:[0,0,0,1,1,1]}],
+'Dmaj9#11':[{n:'Open', fr:[null,null,4,4,3,2],fi:[0,0,4,3,2,1]}],
+'D13':   [{n:'IV',     fr:[null,null,4,2,3,2],fi:[0,0,4,1,3,2]}],
+'Dm11':  [{n:'V',      fr:[5,5,7,5,6,8],    fi:[1,1,3,1,2,4], b:{f:5,s:0,e:5}}],
+
+'E':     [{n:'Open',   fr:[0,2,2,1,0,0],    fi:[0,2,3,1,0,0]},
+          {n:'VII',    fr:[7,9,9,8,7,7],    fi:[1,3,4,2,1,1], b:{f:7,s:0,e:5}}],
+'Em':    [{n:'Open',   fr:[0,2,2,0,0,0],    fi:[0,2,3,0,0,0]},
+          {n:'VII',    fr:[7,9,9,7,7,7],    fi:[1,3,4,1,1,1], b:{f:7,s:0,e:5}}],
+'E7':    [{n:'Open',   fr:[0,2,0,1,0,0],    fi:[0,2,0,1,0,0]}],
+'Emaj7': [{n:'Open',   fr:[0,2,1,1,0,0],    fi:[0,3,1,2,0,0]}],
+'Em7':   [{n:'Open',   fr:[0,2,2,0,3,0],    fi:[0,2,3,0,4,0]},
+          {n:'Open 2', fr:[0,2,0,0,0,0],    fi:[0,1,0,0,0,0]}],
+'Edim':  [{n:'Open',   fr:[null,1,2,3,2,null],fi:[0,1,2,4,3,0]}],
+'Edim7': [{n:'Open',   fr:[null,1,2,0,2,null],fi:[0,1,3,0,2,0]}],
+'Eaug':  [{n:'Open',   fr:[0,3,2,1,1,null], fi:[0,4,3,1,2,0]}],
+'Esus2': [{n:'Open',   fr:[0,2,4,4,0,0],    fi:[0,1,3,4,0,0]}],
+'Esus4': [{n:'Open',   fr:[0,2,2,2,0,0],    fi:[0,1,2,3,0,0]}],
+'E5':    [{n:'Open',   fr:[0,2,2,null,null,null],fi:[0,1,2,0,0,0]}],
+'Eadd9': [{n:'Open',   fr:[0,2,2,1,0,2],    fi:[0,2,3,1,0,4]}],
+'Emadd9':[{n:'Open',   fr:[0,2,2,0,0,2],    fi:[0,2,3,0,0,4]}],
+'E6':    [{n:'Open',   fr:[0,2,2,1,2,0],    fi:[0,2,3,1,4,0]}],
+'Em6':   [{n:'Open',   fr:[0,2,2,0,2,0],    fi:[0,2,3,0,4,0]}],
+'E6/9':  [{n:'Open',   fr:[0,2,2,1,2,2],    fi:[0,2,3,1,4,4]}],
+'Emaj9': [{n:'Open',   fr:[0,2,1,1,0,2],    fi:[0,3,1,2,0,4]}],
+'E9':    [{n:'Open',   fr:[0,2,0,1,0,2],    fi:[0,2,0,1,0,3]}],
+'Em9':   [{n:'Open',   fr:[0,2,0,0,3,0],    fi:[0,1,0,0,3,0]}],
+'EmMaj7':[{n:'Open',   fr:[0,2,1,0,0,0],    fi:[0,2,1,0,0,0]}],
+'Emaj7#5':[{n:'Open',  fr:[0,3,2,1,1,null], fi:[0,4,3,1,2,0]}],
+'E7sus4':[{n:'Open',   fr:[0,2,2,2,0,0],    fi:[0,1,2,3,0,0]}],
+'E7b9':  [{n:'Open',   fr:[0,1,0,1,0,0],    fi:[0,1,0,2,0,0]}],
+'E7#9':  [{n:'Open',   fr:[0,2,0,1,3,0],    fi:[0,2,0,1,4,0]}],
+'Em7b5': [{n:'Open',   fr:[0,1,2,0,3,0],    fi:[0,1,2,0,4,0]}],
+'Emaj9#11':[{n:'Open', fr:[0,2,1,3,0,0],    fi:[0,2,1,4,0,0]}],
+'E13':   [{n:'Open',   fr:[0,2,0,1,2,2],    fi:[0,2,0,1,3,4]}],
+'Em11':  [{n:'Open',   fr:[0,2,2,0,3,3],    fi:[0,1,2,0,3,4]}],
+
+'F':     [{n:'I',      fr:[1,1,3,3,2,1],    fi:[1,1,3,4,2,1], b:{f:1,s:0,e:5}}],
+'Fm':    [{n:'I',      fr:[1,1,3,3,1,1],    fi:[1,1,3,4,1,1], b:{f:1,s:0,e:5}}],
+'F7':    [{n:'I',      fr:[1,1,3,1,2,1],    fi:[1,1,3,1,2,1], b:{f:1,s:0,e:5}}],
+'Fmaj7': [{n:'Open',   fr:[null,null,3,2,1,0],fi:[0,0,3,2,1,0]}],
+'Fm7':   [{n:'I',      fr:[1,1,3,1,1,1],    fi:[1,1,3,1,1,1], b:{f:1,s:0,e:5}}],
+'Fdim':  [{n:'I',      fr:[1,2,3,4,3,null], fi:[1,2,3,4,3,0]}],
+'Fdim7': [{n:'I',      fr:[1,2,3,1,3,null], fi:[1,2,4,1,3,0]}],
+'Faug':  [{n:'Open',   fr:[null,null,3,2,2,1],fi:[0,0,4,2,3,1]}],
+'Fsus2': [{n:'I',      fr:[1,1,3,3,1,1],    fi:[1,1,3,4,1,1], b:{f:1,s:0,e:5}}],
+'Fsus4': [{n:'I',      fr:[1,1,3,3,4,1],    fi:[1,1,2,3,4,1], b:{f:1,s:0,e:5}}],
+'F5':    [{n:'I',      fr:[1,3,3,null,null,null],fi:[1,3,4,0,0,0]}],
+'Fadd9': [{n:'Open',   fr:[null,null,3,2,1,3],fi:[0,0,3,2,1,4]}],
+'Fmadd9':[{n:'I',      fr:[1,1,3,3,1,3],    fi:[1,1,2,3,1,4], b:{f:1,s:0,e:5}}],
+'F6':    [{n:'Open',   fr:[null,null,3,2,3,1],fi:[0,0,3,2,4,1]}],
+'Fm6':   [{n:'I',      fr:[1,1,3,3,1,3],    fi:[1,1,2,3,1,4], b:{f:1,s:0,e:5}}],
+'Fmaj9': [{n:'Open',   fr:[null,0,3,2,1,0],  fi:[0,0,3,2,1,0]}],
+'F9':    [{n:'I',      fr:[1,1,3,1,3,3],    fi:[1,1,3,1,3,4], b:{f:1,s:0,e:5}}],
+'Fm9':   [{n:'I',      fr:[1,1,3,1,1,3],    fi:[1,1,3,1,1,4], b:{f:1,s:0,e:5}}],
+'FmMaj7':[{n:'I',      fr:[1,1,3,2,1,1],    fi:[1,1,3,2,1,1], b:{f:1,s:0,e:5}}],
+'Fmaj7#5':[{n:'Open',  fr:[null,null,3,2,2,1],fi:[0,0,4,2,3,1]}],
+'F7sus4':[{n:'I',      fr:[1,1,3,3,4,1],    fi:[1,1,2,3,4,1], b:{f:1,s:0,e:5}}],
+'F7b9':  [{n:'I',      fr:[1,2,3,2,1,1],    fi:[1,2,4,3,1,1], b:{f:1,s:0,e:5}}],
+'F7#9':  [{n:'I',      fr:[1,1,3,1,4,1],    fi:[1,1,3,1,4,1], b:{f:1,s:0,e:5}}],
+'Fm7b5': [{n:'I',      fr:[1,2,3,1,3,1],    fi:[1,2,4,1,3,1], b:{f:1,s:0,e:5}}],
+'Fmaj9#11':[{n:'Open', fr:[null,null,3,2,1,2],fi:[0,0,4,2,1,3]}],
+'F13':   [{n:'I',      fr:[1,1,3,1,3,1],    fi:[1,1,3,1,4,1], b:{f:1,s:0,e:5}}],
+'Fm11':  [{n:'I',      fr:[1,1,3,1,1,4],    fi:[1,1,3,1,1,4], b:{f:1,s:0,e:5}}],
+
+'G':     [{n:'Open',   fr:[3,2,0,0,0,3],    fi:[2,1,0,0,0,3]},
+          {n:'III',    fr:[3,3,5,5,5,3],    fi:[1,1,3,4,2,1], b:{f:3,s:0,e:5}}],
+'Gm':    [{n:'III',    fr:[3,3,5,5,4,3],    fi:[1,1,3,4,2,1], b:{f:3,s:0,e:5}}],
+'G7':    [{n:'Open',   fr:[3,2,0,0,0,1],    fi:[3,2,0,0,0,1]}],
+'Gmaj7': [{n:'Open',   fr:[3,2,0,0,0,2],    fi:[2,1,0,0,0,3]}],
+'Gm7':   [{n:'III',    fr:[3,3,5,3,3,3],    fi:[1,1,3,1,1,1], b:{f:3,s:0,e:5}}],
+'Gdim':  [{n:'III',    fr:[3,4,5,6,5,null], fi:[1,2,3,4,3,0]}],
+'Gdim7': [{n:'III',    fr:[3,4,5,3,5,null], fi:[1,2,4,1,3,0]}],
+'Gaug':  [{n:'Open',   fr:[3,2,1,0,0,null], fi:[4,3,2,0,0,0]}],
+'Gsus2': [{n:'Open',   fr:[3,0,0,0,0,3],    fi:[2,0,0,0,0,4]}],
+'Gsus4': [{n:'Open',   fr:[3,3,0,0,1,3],    fi:[2,3,0,0,1,4]}],
+'G5':    [{n:'Open',   fr:[3,5,5,null,null,null],fi:[1,3,4,0,0,0]}],
+'Gadd9': [{n:'Open',   fr:[3,2,0,2,0,3],    fi:[2,1,0,3,0,4]}],
+'Gmadd9':[{n:'III',    fr:[3,3,5,5,3,3],    fi:[1,1,3,4,1,1], b:{f:3,s:0,e:5}}],
+'G6':    [{n:'Open',   fr:[3,2,0,0,0,0],    fi:[2,1,0,0,0,0]}],
+'Gm6':   [{n:'III',    fr:[3,3,5,5,3,4],    fi:[1,1,2,3,1,4], b:{f:3,s:0,e:5}}],
+'Gmaj9': [{n:'Open',   fr:[3,2,0,2,0,2],    fi:[3,2,0,4,0,1]}],
+'G9':    [{n:'Open',   fr:[3,2,0,2,1,1],    fi:[4,3,0,2,1,1]}],
+'Gm9':   [{n:'III',    fr:[3,3,5,3,3,5],    fi:[1,1,3,1,1,4], b:{f:3,s:0,e:5}}],
+'GmMaj7':[{n:'III',    fr:[3,3,5,4,3,3],    fi:[1,1,3,2,1,1], b:{f:3,s:0,e:5}}],
+'Gmaj7#5':[{n:'Open',  fr:[3,2,1,0,0,null], fi:[4,3,2,0,0,0]}],
+'G7sus4':[{n:'Open',   fr:[3,3,0,0,1,1],    fi:[3,4,0,0,1,2]}],
+'G7b9':  [{n:'III',    fr:[3,4,5,4,3,3],    fi:[1,2,4,3,1,1], b:{f:3,s:0,e:5}}],
+'G7#9':  [{n:'III',    fr:[3,3,5,3,6,3],    fi:[1,1,3,1,4,1], b:{f:3,s:0,e:5}}],
+'Gm7b5': [{n:'III',    fr:[3,4,5,3,5,3],    fi:[1,2,4,1,3,1], b:{f:3,s:0,e:5}}],
+'Gmaj9#11':[{n:'Open', fr:[3,2,0,2,0,0],    fi:[2,1,0,3,0,0]}],
+'G13':   [{n:'Open',   fr:[3,2,0,0,0,1],    fi:[4,3,0,0,0,1]}],
+'Gm11':  [{n:'III',    fr:[3,3,5,3,4,6],    fi:[1,1,3,1,2,4]}],
+
+'A':     [{n:'Open',   fr:[null,0,2,2,2,0],  fi:[0,0,1,2,3,0]},
+          {n:'V',      fr:[5,7,7,6,5,5],     fi:[1,3,4,2,1,1], b:{f:5,s:0,e:5}}],
+'Am':    [{n:'Open',   fr:[null,0,2,2,1,0],  fi:[0,0,2,3,1,0]},
+          {n:'V',      fr:[5,7,7,5,5,5],     fi:[1,3,4,1,1,1], b:{f:5,s:0,e:5}}],
+'A7':    [{n:'Open',   fr:[null,0,2,0,2,0],  fi:[0,0,2,0,3,0]}],
+'Amaj7': [{n:'Open',   fr:[null,0,2,1,2,0],  fi:[0,0,3,1,4,0]}],
+'Am7':   [{n:'Open',   fr:[null,0,2,0,1,0],  fi:[0,0,2,0,1,0]}],
+'Adim':  [{n:'Open',   fr:[null,0,1,2,1,null],fi:[0,0,1,3,2,0]}],
+'Adim7': [{n:'Open',   fr:[null,0,1,2,1,2],  fi:[0,0,1,3,2,4]}],
+'Aaug':  [{n:'Open',   fr:[null,0,3,2,2,1],  fi:[0,0,4,2,3,1]}],
+'Asus2': [{n:'Open',   fr:[null,0,2,2,0,0],  fi:[0,0,1,2,0,0]}],
+'Asus4': [{n:'Open',   fr:[null,0,2,2,3,0],  fi:[0,0,1,2,3,0]}],
+'A5':    [{n:'Open',   fr:[null,0,2,2,null,null],fi:[0,0,1,2,0,0]}],
+'Aadd9': [{n:'Open',   fr:[null,0,2,4,2,0],  fi:[0,0,1,3,2,0]}],
+'Amadd9':[{n:'Open',   fr:[null,0,2,2,1,3],  fi:[0,0,1,2,1,4]}],
+'A6':    [{n:'Open',   fr:[null,0,2,2,2,2],  fi:[0,0,1,1,1,1]}],
+'Am6':   [{n:'Open',   fr:[null,0,2,2,1,2],  fi:[0,0,2,3,1,4]}],
+'A6/9':  [{n:'Open',   fr:[null,0,2,4,2,2],  fi:[0,0,1,3,2,2]}],
+'Amaj9': [{n:'Open',   fr:[null,0,2,1,0,0],  fi:[0,0,2,1,0,0]}],
+'A9':    [{n:'Open',   fr:[null,0,2,4,2,3],  fi:[0,0,1,3,2,4]}],
+'Am9':   [{n:'V',      fr:[5,7,7,5,5,7],     fi:[1,2,3,1,1,4], b:{f:5,s:0,e:5}}],
+'AmMaj7':[{n:'Open',   fr:[null,0,2,1,1,0],  fi:[0,0,3,1,2,0]}],
+'Amaj7#5':[{n:'Open',  fr:[null,0,3,2,2,1],  fi:[0,0,4,2,3,1]}],
+'A7sus4':[{n:'Open',   fr:[null,0,2,2,3,3],  fi:[0,0,1,2,3,4]}],
+'A7b9':  [{n:'V',      fr:[5,6,7,6,5,5],     fi:[1,2,4,3,1,1], b:{f:5,s:0,e:5}}],
+'A7#9':  [{n:'V',      fr:[5,7,5,6,8,5],     fi:[1,3,1,2,4,1], b:{f:5,s:0,e:5}}],
+'Am7b5': [{n:'V',      fr:[5,6,7,5,7,5],     fi:[1,2,4,1,3,1], b:{f:5,s:0,e:5}}],
+'Amaj9#11':[{n:'Open', fr:[null,0,2,1,2,3],  fi:[0,0,2,1,3,4]}],
+'A13':   [{n:'Open',   fr:[null,0,2,4,2,2],  fi:[0,0,1,3,2,2]}],
+'Am11':  [{n:'V',      fr:[5,7,7,5,5,8],     fi:[1,2,3,1,1,4], b:{f:5,s:0,e:5}}],
+
+'A#':    [{n:'I barre',fr:[null,1,3,3,3,1],  fi:[0,1,3,4,2,1], b:{f:1,s:1,e:5}},
+          {n:'VI',     fr:[6,8,8,7,6,6],     fi:[1,3,4,2,1,1], b:{f:6,s:0,e:5}}],
+'A#m':   [{n:'I barre',fr:[null,1,3,3,2,1],  fi:[0,1,3,4,2,1], b:{f:1,s:1,e:5}}],
+'A#7':   [{n:'I barre',fr:[null,1,3,1,3,1],  fi:[0,1,3,1,4,1], b:{f:1,s:1,e:5}}],
+'A#maj7':[{n:'I barre',fr:[null,1,3,2,3,1],  fi:[0,1,3,2,4,1], b:{f:1,s:1,e:5}}],
+'A#m7':  [{n:'I barre',fr:[null,1,3,1,2,1],  fi:[0,1,3,1,2,1], b:{f:1,s:1,e:5}}],
+'A#dim': [{n:'Open',   fr:[null,1,2,3,2,null],fi:[0,1,2,4,3,0]}],
+'A#dim7':[{n:'Open',   fr:[null,1,2,0,2,null],fi:[0,1,3,0,2,0]}],
+'A#aug': [{n:'I barre',fr:[null,1,4,3,3,2],  fi:[0,1,4,2,3,1]}],
+'A#sus2':[{n:'I barre',fr:[null,1,3,3,1,1],  fi:[0,1,3,4,1,1], b:{f:1,s:1,e:5}}],
+'A#sus4':[{n:'I barre',fr:[null,1,3,3,4,1],  fi:[0,1,2,3,4,1], b:{f:1,s:1,e:5}}],
+'A#5':   [{n:'I barre',fr:[null,1,3,3,null,null],fi:[0,1,3,4,0,0]}],
+'A#add9':[{n:'I barre',fr:[null,1,3,3,1,3],  fi:[0,1,2,3,1,4], b:{f:1,s:1,e:5}}],
+'A#6':   [{n:'I barre',fr:[null,1,3,3,3,3],  fi:[0,1,2,3,4,4]}],
+'A#m6':  [{n:'I barre',fr:[null,1,3,3,2,3],  fi:[0,1,2,3,1,4]}],
+'A#maj9':[{n:'I barre',fr:[null,1,3,2,1,1],  fi:[0,1,3,2,1,1], b:{f:1,s:1,e:5}}],
+'A#9':   [{n:'I barre',fr:[null,1,3,1,3,3],  fi:[0,1,3,1,3,4], b:{f:1,s:1,e:5}}],
+'A#m9':  [{n:'I barre',fr:[null,1,3,1,2,3],  fi:[0,1,3,1,2,4], b:{f:1,s:1,e:5}}],
+'A#mMaj7':[{n:'I barre',fr:[null,1,3,2,2,1], fi:[0,1,3,2,2,1], b:{f:1,s:1,e:5}}],
+'A#7sus4':[{n:'I barre',fr:[null,1,3,3,4,1], fi:[0,1,2,3,4,1], b:{f:1,s:1,e:5}}],
+'A#7b9': [{n:'VI',     fr:[6,7,8,7,6,6],     fi:[1,2,4,3,1,1], b:{f:6,s:0,e:5}}],
+'A#m7b5':[{n:'I barre',fr:[null,1,2,1,2,1],  fi:[0,1,2,1,3,1], b:{f:1,s:1,e:5}}],
+'A#13':  [{n:'VI',     fr:[6,8,6,7,8,6],     fi:[1,3,1,2,4,1], b:{f:6,s:0,e:5}}],
+
+'B':     [{n:'II barre',fr:[null,2,4,4,4,2], fi:[0,1,3,4,2,1], b:{f:2,s:1,e:5}},
+          {n:'VII',    fr:[7,9,9,8,7,7],     fi:[1,3,4,2,1,1], b:{f:7,s:0,e:5}}],
+'Bm':    [{n:'II barre',fr:[null,2,4,4,3,2], fi:[0,1,3,4,2,1], b:{f:2,s:1,e:5}}],
+'B7':    [{n:'Open',   fr:[null,2,1,2,0,2],  fi:[0,3,1,4,0,2]}],
+'Bmaj7': [{n:'II barre',fr:[null,2,4,3,4,2], fi:[0,1,3,2,4,1], b:{f:2,s:1,e:5}}],
+'Bm7':   [{n:'II barre',fr:[null,2,4,2,3,2], fi:[0,1,3,1,2,1], b:{f:2,s:1,e:5}}],
+'Bdim':  [{n:'Open',   fr:[null,2,3,4,3,null],fi:[0,1,2,4,3,0]}],
+'Bdim7': [{n:'Open',   fr:[null,2,3,1,3,null],fi:[0,2,4,1,3,0]}],
+'Baug':  [{n:'Open',   fr:[null,2,1,0,0,null],fi:[0,3,2,0,0,0]}],
+'Bsus2': [{n:'II barre',fr:[null,2,4,4,2,2], fi:[0,1,3,4,1,1], b:{f:2,s:1,e:5}}],
+'Bsus4': [{n:'II barre',fr:[null,2,4,4,5,2], fi:[0,1,2,3,4,1], b:{f:2,s:1,e:5}}],
+'B5':    [{n:'II barre',fr:[null,2,4,4,null,null],fi:[0,1,3,4,0,0]}],
+'Badd9': [{n:'II barre',fr:[null,2,4,4,4,4], fi:[0,1,2,3,4,4]}],
+'Bmadd9':[{n:'II barre',fr:[null,2,4,4,3,4], fi:[0,1,2,3,1,4]}],
+'B6':    [{n:'II barre',fr:[null,2,4,4,4,4], fi:[0,1,2,3,4,4]}],
+'Bm6':   [{n:'II barre',fr:[null,2,4,4,3,4], fi:[0,1,2,3,1,4]}],
+'Bmaj9': [{n:'II barre',fr:[null,2,4,3,2,2], fi:[0,1,3,2,1,1], b:{f:2,s:1,e:5}}],
+'B9':    [{n:'Open',   fr:[null,2,1,2,2,4],  fi:[0,2,1,3,3,4]}],
+'Bm9':   [{n:'II barre',fr:[null,2,4,2,3,4], fi:[0,1,3,1,2,4], b:{f:2,s:1,e:4}}],
+'BmMaj7':[{n:'II barre',fr:[null,2,4,3,3,2], fi:[0,1,3,2,2,1], b:{f:2,s:1,e:5}}],
+'Bmaj7#5':[{n:'Open',  fr:[null,2,1,0,0,null],fi:[0,3,2,0,0,0]}],
+'B7sus4':[{n:'II barre',fr:[null,2,4,2,5,2], fi:[0,1,2,1,4,1], b:{f:2,s:1,e:5}}],
+'B7b9':  [{n:'VII',    fr:[7,8,9,8,7,7],     fi:[1,2,4,3,1,1], b:{f:7,s:0,e:5}}],
+'B7#9':  [{n:'VII',    fr:[7,9,7,8,10,7],    fi:[1,3,1,2,4,1], b:{f:7,s:0,e:5}}],
+'Bm7b5': [{n:'II barre',fr:[null,2,3,2,3,2], fi:[0,1,2,1,3,1], b:{f:2,s:1,e:5}}],
+'Bmaj9#11':[{n:'II barre',fr:[null,2,4,3,4,4],fi:[0,1,3,2,4,4], b:{f:2,s:1,e:5}}],
+'B13':   [{n:'VII',    fr:[7,9,7,8,9,7],     fi:[1,3,1,2,4,1], b:{f:7,s:0,e:5}}],
+'Bm11':  [{n:'II barre',fr:[null,2,4,2,3,5], fi:[0,1,3,1,2,4], b:{f:2,s:1,e:5}}],
+};
+
+// Suffix aliases per il lookup delle diteggiature
+const SUF_ALIAS={
+  '7b9':'7b9','7#9':'7#9','m7b5':'m7b5','maj9#11':'maj9#11',
+  '13':'13','m11':'m11','madd9':'madd9','6/9':'6/9','maj7#5':'maj7#5',
+  'mMaj7':'mMaj7','7sus4':'7sus4','aug7':'7','m6':'m6','add9':'add9',
+};
+
+function getFingering(root,suf){
+  // normalise root to sharp
+  const rmap={'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
+  const r=rmap[root]||root;
+  const key=r+suf;
+  if(FING[key]) return FING[key];
+  // alias
+  const a=SUF_ALIAS[suf];
+  if(a&&FING[r+a]) return FING[r+a];
+  return makeFallback(r,suf);
+}
+
+function makeFallback(root,suf){
+  const r=ni(root); if(r<0) return [];
+
+  // E-shape barre: root sulla corda E bassa, tasto = r (se r>0) o r+12
+  const ef=r>0?r:(r+12);
+  // A-shape barre: root sulla corda A, tasto = (r-5+12)%12
+  const af=((r-5+12)%12)||12;
+
+  // Forme E-shape [E,A,D,G,B,e] relative al capotasto ef
+  // (i valori sono offset dal tasto barre)
+  const E_SHAPES = {
+    '':      {fr:[0,2,2,1,0,0], fi:[1,3,4,2,1,1]},
+    'm':     {fr:[0,2,2,0,0,0], fi:[1,3,4,1,1,1]},
+    '7':     {fr:[0,2,0,1,0,0], fi:[1,3,0,2,1,1]},
+    'maj7':  {fr:[0,2,1,1,0,0], fi:[1,4,2,3,1,1]},
+    'm7':    {fr:[0,2,0,0,0,0], fi:[1,3,0,0,1,1]},
+    'dim':   {fr:[0,1,2,3,2,null],fi:[1,1,2,4,3,0]},
+    'dim7':  {fr:[0,1,2,0,2,null],fi:[1,1,3,0,2,0]},
+    'aug':   {fr:[0,3,2,1,1,null],fi:[1,4,3,2,2,0]},
+    'sus2':  {fr:[0,2,4,4,0,0], fi:[1,2,3,4,1,1]},
+    'sus4':  {fr:[0,2,2,2,0,0], fi:[1,2,3,4,1,1]},
+    'm7b5':  {fr:[0,1,2,0,3,0], fi:[1,1,2,0,4,1]},
+    'maj7#5':{fr:[0,3,2,1,1,null],fi:[1,4,3,2,2,0]},
+    'mMaj7': {fr:[0,2,1,0,0,0], fi:[1,3,2,0,1,1]},
+    '7sus4': {fr:[0,2,2,2,0,0], fi:[1,2,3,4,1,1]},
+    'add9':  {fr:[0,2,2,1,0,2], fi:[1,3,4,2,1,4]},
+    '6':     {fr:[0,2,2,1,2,0], fi:[1,3,4,2,4,1]},
+    'm6':    {fr:[0,2,2,0,2,0], fi:[1,3,4,0,4,1]},
+    '9':     {fr:[0,2,0,1,0,2], fi:[1,3,0,2,1,4]},
+    'm9':    {fr:[0,2,0,0,3,0], fi:[1,3,0,0,4,1]},
+  };
+
+  // A-shape [null,A,D,G,B,e] relative al capotasto af
+  const A_SHAPES = {
+    '':      {fr:[null,0,2,2,2,0], fi:[0,1,3,4,2,1]},
+    'm':     {fr:[null,0,2,2,1,0], fi:[0,1,3,4,2,1]},
+    '7':     {fr:[null,0,2,0,2,0], fi:[0,1,3,0,4,1]},
+    'maj7':  {fr:[null,0,2,1,2,0], fi:[0,1,4,2,3,1]},
+    'm7':    {fr:[null,0,2,0,1,0], fi:[0,1,3,0,2,1]},
+    'sus2':  {fr:[null,0,2,2,0,0], fi:[0,1,2,3,1,1]},
+    'sus4':  {fr:[null,0,2,2,3,0], fi:[0,1,2,3,4,1]},
+    'add9':  {fr:[null,0,2,4,2,0], fi:[0,1,2,4,3,1]},
+    '6':     {fr:[null,0,2,2,2,2], fi:[0,1,2,2,2,2]},
+    'm6':    {fr:[null,0,2,2,1,2], fi:[0,1,2,3,1,4]},
+  };
+
+  const shape = E_SHAPES[suf] || E_SHAPES[''];
+  const aShape = A_SHAPES[suf];
+
+  const results = [];
+
+  // E-shape barre
+  if(ef>=1 && ef<=12){
+    const fr=shape.fr.map(v=>v===null?null:(v===0?ef:ef+v-0));
+    // offset: tutte le note non-null vengono shiftate di ef (eccetto quelle che rimangono 0=open non usato in barre)
+    const frBarre=shape.fr.map(v=>v===null?null:ef+v);
+    results.push({n:`${ef} pos (E-shape)`, fr:frBarre, fi:shape.fi, b:{f:ef,s:0,e:5}});
+  }
+
+  // A-shape barre (se disponibile e il tasto è ragionevole)
+  if(aShape && af>=1 && af<=12){
+    const frBarre=aShape.fr.map(v=>v===null?null:(v===0?af:af+v));
+    results.push({n:`${af} pos (A-shape)`, fr:frBarre, fi:aShape.fi, b:{f:af,s:1,e:5}});
+  }
+
+  return results.length ? results : [{n:`${ef} pos`, fr:E_SHAPES[''].fr.map(v=>v===null?null:ef+v), fi:E_SHAPES[''].fi, b:{f:ef,s:0,e:5}}];
+}
+
+// ── SCALE ANALYSIS ──
+function findScales(sel){
+  if(!sel.length) return [];
+  const res=[]; const seen=new Set();
+  for(let ri=0;ri<12;ri++){
+    const root=NOTES[ri];
+    for(const sc of SCALES){
+      const sn=sc.f.map(i=>NOTES[(ri+i)%12]);
+      if(sel.every(n=>sn.includes(n))){
+        const score=sel.length/sn.length+(sn[0]===sel[0]?0.5:0);
+        const key=root+sc.name;
+        if(!seen.has(key)){seen.add(key);res.push({root,sc,sn,score});}
+      }
+    }
+  }
+  return res.sort((a,b)=>b.score-a.score);
+}
+
+// ── CHORD ANALYSIS ──
+function getChordsForKey(root,mode){
+  const ri=ni(root);
+  const formula=mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
+  const scale=formula.map(i=>NOTES[(ri+i)%12]);
+  const res=[]; const seen=new Set();
+  for(const ch of CHORDS){
+    for(let cri=0;cri<12;cri++){
+      const cr=NOTES[cri];
+      if(!scale.includes(cr)) continue;
+      const cn=ch.iv.map(i=>NOTES[(cri+i)%12]);
+      if(cn.every(n=>scale.includes(n))){
+        const deg=scale.indexOf(cr)+1;
+        const key=cr+ch.suf;
+        if(!seen.has(key)){seen.add(key);res.push({...ch,cr,deg,cn});}
+      }
+    }
+  }
+  return res.sort((a,b)=>a.deg-b.deg);
+}
+
+// ── DRAW FRETBOARD ──
+// small=true → anteprima nella card (solo punti, no note)
+// small=false → versione grande per il modal
+function drawFretboard(scaleNotes, rootNote, small=true){
+  const FRETS=12;
+  const strNotes=[
+    [4,5,6,7,8,9,10,11,0,1,2,3,4],   // e (high)
+    [11,0,1,2,3,4,5,6,7,8,9,10,11],  // B
+    [7,8,9,10,11,0,1,2,3,4,5,6,7],   // G
+    [2,3,4,5,6,7,8,9,10,11,0,1,2],   // D
+    [9,10,11,0,1,2,3,4,5,6,7,8,9],   // A
+    [4,5,6,7,8,9,10,11,0,1,2,3,4],   // E (low)
+  ];
+
+  const W = small ? 300 : 660;
+  const H = small ? 90  : 200;
+  const PL= small ? 5   : 36;  // spazio a sinistra per numeri tasto
+  const PR= small ? 5   : 8;
+  const PT= small ? 10  : 18;
+  const PB= small ? 14  : 28;
+  const dotR = small ? 6 : 13;
+  const fontSize = small ? 0 : 9; // 0 = no labels in small
+
+  const gridW=W-PL-PR;
+  const gridH=H-PT-PB;
+  const fretGap=gridW/(FRETS+1);
+  const strGap=gridH/5;
+
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#0a0a0c" rx="6"/>`;
+
+  // Marker dots di posizione
+  [3,5,7,9,12].forEach(f=>{
+    const cx=PL+fretGap+(f-0.5)*fretGap;
+    const cy=PT+gridH/2;
+    const mr=small?3:5;
+    if(f===12){
+      s+=`<circle cx="${cx}" cy="${cy-strGap}" r="${mr}" fill="#1e1e2a"/>`;
+      s+=`<circle cx="${cx}" cy="${cy+strGap}" r="${mr}" fill="#1e1e2a"/>`;
+    } else {
+      s+=`<circle cx="${cx}" cy="${cy}" r="${mr}" fill="#1e1e2a"/>`;
+    }
+  });
+
+  // Nut
+  s+=`<rect x="${PL+fretGap-2}" y="${PT-2}" width="${small?3:5}" height="${gridH+4}" rx="1.5" fill="#d4a843"/>`;
+
+  // Fret lines
+  for(let f=1;f<=FRETS;f++){
+    const x=PL+fretGap+f*fretGap;
+    s+=`<line x1="${x}" y1="${PT}" x2="${x}" y2="${PT+gridH}" stroke="#2a2a3a" stroke-width="${small?1:1.5}"/>`;
+  }
+
+  // Strings
+  for(let si=0;si<6;si++){
+    const y=PT+si*strGap;
+    const sw=(small?0.6:1.2+(5-si)*0.2).toFixed(2);
+    s+=`<line x1="${PL+fretGap-2}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#3e3e52" stroke-width="${sw}"/>`;
+  }
+
+  // Numeri tasto (solo versione grande)
+  if(!small){
+    [1,2,3,4,5,6,7,8,9,10,11,12].forEach(f=>{
+      const x=PL+fretGap+(f-0.5)*fretGap;
+      const isMark=[3,5,7,9,12].includes(f);
+      s+=`<text x="${x}" y="${H-6}" text-anchor="middle" font-size="10" fill="${isMark?'#6666aa':'#333348'}" font-family="DM Mono,monospace" font-weight="${isMark?'600':'400'}">${f}</text>`;
+    });
+    // Etichette corde a sinistra
+    ['e','B','G','D','A','E'].forEach((n,si)=>{
+      const y=PT+si*strGap;
+      s+=`<text x="${PL-6}" y="${y+3.5}" text-anchor="end" font-size="10" fill="#55556a" font-family="DM Mono,monospace">${n}</text>`;
+    });
+  }
+
+  // Note sulla tastiera
+  for(let si=0;si<6;si++){
+    const y=PT+si*strGap;
+    for(let f=0;f<=FRETS;f++){
+      const n=NOTES[strNotes[si][f]];
+      if(scaleNotes.includes(n)){
+        const x=f===0 ? PL+fretGap*0.5 : PL+fretGap+(f-0.5)*fretGap;
+        const isR=n===rootNote;
+        if(isR){
+          s+=`<circle cx="${x}" cy="${y}" r="${dotR}" fill="#e8b84b" stroke="#fff5cc" stroke-width="${small?1:2}"/>`;
+          if(!small) s+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="8" fill="#0a0a0c" font-family="DM Mono,monospace" font-weight="700">${n.replace('#','♯')}</text>`;
+        } else {
+          s+=`<circle cx="${x}" cy="${y}" r="${dotR*0.88}" fill="#1b6e90" stroke="#4db8e0" stroke-width="${small?0.8:1.5}"/>`;
+          if(!small) s+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="8" fill="#ddf" font-family="DM Mono,monospace" font-weight="600">${n.replace('#','♯')}</text>`;
+        }
+      }
+    }
+  }
+
+  s+='</svg>';
+  return s;
+}
+
+// ── DRAW CHORD DIAGRAM ──
+const FC={1:'#e8b84b',2:'#4bbce8',3:'#e8824b',4:'#4be88a'};
+
+function drawChord(v,W=155,H=180){
+  if(!v||!v.fr) return `<svg width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#0a0a0c" rx="5"/><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#333" font-size="11" font-family="DM Mono">—</text></svg>`;
+  const fr=v.fr; const fi=v.fi||[]; const b=v.b;
+  const valid=fr.filter(x=>x!==null&&x>0);
+  const minF=b?b.f:(valid.length?Math.min(...valid):1);
+  const maxF=valid.length?Math.max(...valid):4;
+  const startF=(b && b.f>3) ? b.f : 0;
+  const showF=Math.max(4,maxF-startF+1);
+  const PL=30,PT=30,PR=8,PB=26;
+  const gw=W-PL-PR; const gh=H-PT-PB;
+  const sg=gw/5; const fg=gh/showF;
+  const dr=Math.min(fg*0.40,sg*0.40);
+
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#0a0a0c" rx="5"/>`;
+
+  // Nut
+  if(startF===0) s+=`<rect x="${PL}" y="${PT}" width="${gw}" height="5" rx="1.5" fill="#d4a843"/>`;
+
+  // Fret lines
+  for(let f=0;f<=showF;f++){
+    const y=PT+f*fg;
+    s+=`<line x1="${PL}" y1="${y}" x2="${PL+gw}" y2="${y}" stroke="#2e2e3e" stroke-width="1.2"/>`;
+  }
+  // Strings
+  for(let st=0;st<6;st++){
+    const x=PL+st*sg;
+    const sw=(1.6-st*0.18).toFixed(2);
+    s+=`<line x1="${x}" y1="${PT}" x2="${x}" y2="${PT+gh}" stroke="#44445a" stroke-width="${sw}"/>`;
+  }
+
+  // Fret numbers
+  for(let f=1;f<=showF;f++){
+    const y=PT+(f-0.5)*fg;
+    s+=`<text x="${PL-7}" y="${y+3.5}" text-anchor="end" font-size="9" fill="#66668a" font-family="DM Mono,monospace">${startF+f}</text>`;
+  }
+
+  // Barre
+  if(b){
+    const y=PT+(b.f-startF-0.5)*fg;
+    const x1=PL+b.s*sg; const x2=PL+b.e*sg;
+    s+=`<rect x="${x1}" y="${y-dr}" width="${x2-x1}" height="${dr*2}" rx="${dr}" fill="#e8b84b" stroke="#fff5cc" stroke-width="1"/>`;
+    s+=`<text x="${(x1+x2)/2}" y="${y+dr*0.42}" text-anchor="middle" font-size="${Math.max(9,dr).toFixed(0)}" fill="#0a0a0c" font-family="DM Mono,monospace" font-weight="700">1</text>`;
+  }
+
+  // Muted / open
+  fr.forEach((f,si)=>{
+    const x=PL+si*sg;
+    if(f===null) s+=`<text x="${x}" y="${PT-10}" text-anchor="middle" font-size="14" fill="#cc3333" font-family="DM Mono,monospace">✕</text>`;
+    else if(f===0) s+=`<circle cx="${x}" cy="${PT-11}" r="6" fill="none" stroke="#aaaacc" stroke-width="2"/>`;
+  });
+
+  // Dots
+  fr.forEach((f,si)=>{
+    const x=PL+si*sg;
+    if(f!==null&&f>0){
+      const fp=f-startF;
+      if(fp>0&&fp<=showF){
+        const y=PT+(fp-0.5)*fg;
+        const isB=b&&f===b.f&&(si>=b.s&&si<=b.e);
+        if(!isB){
+          const fn=fi[si]; const col=FC[fn]||'#e8b84b';
+          s+=`<circle cx="${x}" cy="${y}" r="${dr}" fill="${col}" stroke="rgba(255,255,255,.15)" stroke-width="1"/>`;
+          if(fn) s+=`<text x="${x}" y="${y+dr*0.42}" text-anchor="middle" font-size="${Math.max(9,dr).toFixed(0)}" fill="#0a0a0c" font-family="DM Mono,monospace" font-weight="700">${fn}</text>`;
+        }
+      }
+    }
+  });
+
+  // String labels
+  ['E','A','D','G','B','e'].forEach((n,si)=>{
+    s+=`<text x="${PL+si*sg}" y="${H-5}" text-anchor="middle" font-size="9" fill="#66668a" font-family="DM Mono,monospace">${n}</text>`;
+  });
+  s+='</svg>'; return s;
+}
+
+// ── UI STATE ──
+let selKey=null, selMode='major';
+
+function initGrids(){
+  ['key-row'].forEach((id)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    NOTES.forEach((n,i)=>{
+      const b=document.createElement('button');
+      b.className='key-btn';
+      b.dataset.note=n;
+      const main=n.includes('#')?n.replace('#','♯'):n;
+      const altHtml=NOTE_ALT[i]?`<span class="ka">${NOTE_ALT[i]}</span>`:'';
+      b.innerHTML=`<span class="km">${main}</span>${altHtml}`;
+      b.onclick=()=>selectKey(b,n);
+      el.appendChild(b);
+    });
+  });
+}
+
+function toggleSN(btn,note){
+  const i=selScales.indexOf(note);
+  if(i>=0){selScales.splice(i,1);btn.classList.remove('sel');}
+  else{selScales.push(note);btn.classList.add('sel');}
+  document.getElementById('sd-scales').textContent=selScales.length?`Note: ${selScales.join(' · ')}`:'nessuna nota selezionata';
+}
+
+function selectKey(btn,key){
+  document.querySelectorAll('.key-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); selKey=key;
+  document.getElementById('sd-chords').textContent=`Tonalità: ${key.replace('#','♯')} ${selMode==='major'?'Maggiore':'Minore'}`;
+}
+
+function selectMode(mode){
+  selMode=mode;
+  document.getElementById('mode-major').classList.toggle('sel',mode==='major');
+  document.getElementById('mode-minor').classList.toggle('sel',mode==='minor');
+  if(selKey) document.getElementById('sd-chords').textContent=`Tonalità: ${selKey.replace('#','♯')} ${mode==='major'?'Maggiore':'Minore'}`;
+}
+
+// ── ANALYZE SCALES ──
+function analyzeScales(){
+  if(!selScales.length){showMsg('scales','Seleziona almeno una nota.');return;}
+  const res=findScales(selScales);
+  const cont=document.getElementById('scales-results');
+  if(!res.length){cont.innerHTML=`<div class="empty"><div class="icon">🎸</div><p>Nessuna scala trovata. Prova una combinazione diversa.</p></div>`;return;}
+  const cats={basic:'Base',modal:'Modi',penta:'Pentatoniche',exotic:'Esotiche',jazz:'Jazz'};
+  const grouped={};
+  res.forEach(r=>{const c=r.sc.cat;if(!grouped[c])grouped[c]=[];grouped[c].push(r);});
+  let h=`<div class="results-count">${res.length} scale trovate — clicca su una per vedere la tastiera</div>`;
+  h+=`<div class="filter-tabs"><button class="ftab active" onclick="filterScales('all',this)">Tutte (${res.length})</button>`;
+  Object.entries(cats).forEach(([c,l])=>{if(grouped[c])h+=`<button class="ftab" onclick="filterScales('${c}',this)">${l} (${grouped[c].length})</button>`;});
+  h+='</div><div class="scales-grid" id="scales-grid">';
+  // Mappa dati scale per il modal (evita problemi con virgolette in onclick)
+  window._scaleData={};
+  res.forEach((r,idx)=>{
+    const key='sc'+idx;
+    window._scaleData[key]={root:r.root, name:r.sc.name, cat:r.sc.cat, desc:r.sc.desc, sn:r.sn};
+    const pills=r.sn.map(n=>`<span class="snote${n===r.root?' root':''}">${n.replace('#','♯')}</span>`).join('');
+    h+=`<div class="scale-card" data-cat="${r.sc.cat}" data-key="${key}" style="animation-delay:${idx*.04}s;cursor:pointer"
+      onclick="openScaleModal('${key}')">
+      <div class="scale-header">
+        <div class="scale-name">${r.root.replace('#','♯')} ${r.sc.name}</div>
+        <span class="scat scat-${r.sc.cat}">${cats[r.sc.cat]||r.sc.cat}</span>
+      </div>
+      <div class="scale-notes">${pills}</div>
+      <div class="scale-desc">${r.sc.desc}</div>
+      <div class="fb-wrap">${drawFretboard(r.sn,r.root,true)}</div>
+      <div style="font-size:.6rem;color:var(--text3);text-align:center;margin-top:.5rem;letter-spacing:2px">CLICCA PER DETTAGLI →</div>
+    </div>`;
+  });
+  h+='</div>';
+  cont.innerHTML=h;
+}
+
+// ── CALCOLA 5 POSIZIONI DI UNA SCALA ──
+// Logica corretta: ogni posizione è una finestra di 4 tasti consecutivi
+// che contiene il massimo di note. Le 5 posizioni coprono tutto il manico
+// senza sovrapposizioni, ancorate alla tonica.
+// ═══════════════════════════════════════════════════════════
+// DATABASE PATTERN SCALE — SISTEMA CAGED (5 POSIZIONI)
+// Generato matematicamente per C e trasposto automaticamente
+// rootStr: 0=E bassa, 1=A, 2=D  |  rootOff: offset tonica dal startFret
+// strings: [E,A,D,G,B,e] → array offset dal startFret
+// ═══════════════════════════════════════════════════════════
+const CAGED_SCALE_PATTERNS = {
+  'maggiore': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[0, 1, 3], [0, 1, 3], [0, 2, 3], [0, 2, 3], [1, 3], [0, 1, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 3, 4], [1, 3], [0, 1, 3], [0, 1, 3], [1, 3, 4], [1, 3, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2, 4], [0, 1, 3], [0, 1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 3], [0, 1, 3], [0, 1, 3], [0, 2, 3], [1, 3, 4], [1, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[1, 3, 4], [1, 3, 4], [1, 3], [0, 1, 3], [1, 2, 4], [1, 3, 4]] },
+    ]
+  },
+  'minore': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 3, 4], [1, 3, 4], [1, 3], [0, 1, 3], [1, 2, 4], [1, 3, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 2, 4], [1, 2, 4], [1, 3, 4], [1, 3, 4], [0, 2, 4], [1, 2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3, 4], [1, 3], [0, 1, 3], [0, 1, 3], [1, 3, 4], [1, 3, 4]] },
+      { name:'A-shape', rootStr:1, rootOff:0, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2], [0, 1, 3], [0, 1, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[0, 2, 4], [1, 2, 4], [1, 2, 4], [1, 3, 4], [0, 2, 4], [0, 2, 4]] },
+    ]
+  },
+  'minore_arm': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[0, 1, 3, 4], [1, 3, 4], [2, 3], [0, 1, 3], [1, 2], [0, 1, 3, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 2, 4], [1, 2], [0, 1, 3, 4], [1, 3, 4], [0, 3, 4], [1, 2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3, 4], [2, 3], [0, 1, 3], [0, 1, 4], [0, 1, 3, 4], [1, 3, 4]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 2], [0, 1, 3, 4], [1, 3, 4], [2, 3], [1, 2, 4], [1, 2]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[0, 3, 4], [1, 2, 4], [1, 2], [0, 1, 3, 4], [0, 2, 4], [0, 3, 4]] },
+    ]
+  },
+  'minore_mel': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[0, 1, 3, 4], [1, 3], [0, 2, 3], [0, 1, 3], [1, 3], [0, 1, 3, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 2, 4], [1, 3], [0, 1, 3, 4], [1, 3], [1, 3, 4], [1, 2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3], [0, 2, 3], [0, 1, 3], [0, 2, 4], [0, 1, 3, 4], [1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 3], [0, 1, 3, 4], [1, 3], [0, 2, 3], [1, 2, 4], [1, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[1, 3, 4], [1, 2, 4], [1, 3], [0, 1, 3, 4], [0, 2, 4], [1, 3, 4]] },
+    ]
+  },
+  'penta_major': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 3], [0, 3], [0, 3], [0, 2], [1, 3], [1, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 3], [1, 3], [1, 3], [0, 3], [1, 4], [1, 3]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[0, 3], [0, 3], [0, 2], [0, 2], [1, 3], [0, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 3], [1, 3], [0, 3], [0, 3], [1, 3], [1, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:3, strings:[[0, 3], [0, 2], [0, 2], [0, 2], [0, 3], [0, 3]] },
+    ]
+  },
+  'penta_minor': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:0, strings:[[0, 3], [0, 2], [0, 2], [0, 2], [0, 3], [0, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:0, strings:[[1, 3], [0, 3], [0, 3], [0, 2], [1, 3], [1, 3]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3], [1, 3], [1, 3], [0, 3], [1, 4], [1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:0, strings:[[0, 3], [0, 3], [0, 2], [0, 2], [1, 3], [0, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[2, 4], [2, 4], [1, 4], [1, 4], [0, 2, 4], [2, 4]] },
+    ]
+  },
+  'blues': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 4], [1, 2, 3], [1, 3], [1, 3, 4], [0, 1, 4], [1, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[2, 4], [0, 1, 4], [1, 4], [1, 2, 3], [2, 4], [2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 2, 3], [1, 3], [1, 3, 4], [0, 3], [1, 4], [1, 2, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[0, 1, 4], [1, 4], [1, 2, 3], [1, 3], [2, 4], [0, 1, 4]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[2, 4], [2, 4], [0, 1, 4], [1, 4], [0, 2, 3, 4], [2, 4]] },
+    ]
+  },
+  'dorico': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 3, 4], [1, 3], [0, 1, 3], [0, 1, 3], [1, 3, 4], [1, 3, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:0, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2], [0, 1, 3], [0, 1, 3]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3], [0, 1, 3], [0, 1, 3], [0, 2, 3], [1, 3, 4], [1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 3, 4], [1, 3, 4], [1, 3], [0, 1, 3], [1, 2, 4], [1, 3, 4]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[1, 2, 4], [1, 2, 4], [1, 3, 4], [1, 3, 4], [0, 2, 4], [1, 2, 4]] },
+    ]
+  },
+  'frigio': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:0, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2], [0, 1, 3], [0, 1, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[0, 2, 4], [1, 2, 4], [1, 2, 4], [1, 3, 4], [0, 2, 4], [0, 2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[1, 3, 4], [1, 3, 4], [1, 3], [0, 1, 3], [1, 2, 4], [1, 3, 4]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 2, 4], [1, 2, 4], [1, 3, 4], [1, 3, 4], [0, 2, 4], [1, 2, 4]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[0, 2, 4], [0, 2, 4], [1, 2, 4], [1, 2, 4], [0, 2, 4], [0, 2, 4]] },
+    ]
+  },
+  'lidio': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2, 4], [0, 1, 3], [0, 1, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 3], [0, 1, 3], [0, 1, 3], [0, 2, 3], [1, 3, 4], [1, 3]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[0, 2, 3], [0, 2, 3], [0, 2, 4], [0, 2, 4], [0, 1, 3], [0, 2, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[0, 1, 3], [0, 1, 3], [0, 2, 3], [0, 2, 3], [1, 3], [0, 1, 3]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[1, 3, 4], [1, 3], [0, 1, 3], [0, 1, 3], [1, 3, 4], [1, 3, 4]] },
+    ]
+  },
+  'misolidio': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 3], [0, 1, 3], [0, 1, 3], [0, 2, 3], [1, 3, 4], [1, 3]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[1, 3, 4], [1, 3, 4], [1, 3], [0, 1, 3], [1, 2, 4], [1, 3, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:3, strings:[[0, 1, 3], [0, 1, 3], [0, 2, 3], [0, 2, 3], [1, 3], [0, 1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[1, 3, 4], [1, 3], [0, 1, 3], [0, 1, 3], [1, 3, 4], [1, 3, 4]] },
+      { name:'G-shape', rootStr:0, rootOff:3, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2], [0, 1, 3], [0, 1, 3]] },
+    ]
+  },
+  'locrio': {
+    positions: [
+      { name:'E-shape', rootStr:0, rootOff:1, strings:[[1, 2, 4], [1, 2, 4], [1, 3, 4], [1, 3, 4], [0, 2, 4], [1, 2, 4]] },
+      { name:'D-shape', rootStr:2, rootOff:1, strings:[[0, 2, 4], [0, 2, 4], [1, 2, 4], [1, 2, 4], [0, 2, 4], [0, 2, 4]] },
+      { name:'C-shape', rootStr:1, rootOff:2, strings:[[0, 1, 3], [0, 2, 3], [0, 2, 3], [0, 2], [0, 1, 3], [0, 1, 3]] },
+      { name:'A-shape', rootStr:1, rootOff:1, strings:[[0, 2, 4], [1, 2, 4], [1, 2, 4], [1, 3, 4], [0, 2, 4], [0, 2, 4]] },
+      { name:'G-shape', rootStr:0, rootOff:4, strings:[[0, 2, 4], [0, 2, 4], [0, 2, 4], [1, 2, 4], [0, 2, 3], [0, 2, 4]] },
+    ]
+  },
+};
+
+// Mappa nome scala → chiave pattern
+const SCALE_PATTERN_KEY = {
+  'Maggiore (Ionica)':       'maggiore',
+  'Minore Naturale':         'minore',
+  'Minore Armonica':         'minore_arm',
+  'Minore Melodica':         'minore_mel',
+  'Pentatonica Maggiore':    'penta_major',
+  'Pentatonica Minore':      'penta_minor',
+  'Blues':                   'blues',
+  'Dorico':                  'dorico',
+  'Frigio':                  'frigio',
+  'Lidio':                   'lidio',
+  'Misolidio':               'misolidio',
+  'Locrio':                  'locrio',
+};
+
+// Trova il tasto iniziale della posizione CAGED per una data tonalità
+// rootStr: 0=E bassa, 1=A, 2=D
+// rootOff: offset della tonica dal startFret
+function findStartFret(rootNote, rootStr, rootOff) {
+  const strOpen = [4, 9, 2, 7, 11, 4]; // E A D G B e
+  // Trova il tasto dove cade la tonica sulla corda di ancoraggio
+  for(let f = 1; f <= 12; f++){
+    if(NOTES[(strOpen[rootStr] + f) % 12] === rootNote){
+      return f - rootOff;
+    }
+  }
+  return 1;
+}
+
+// Calcola il range di tasti di una posizione
+function positionRange(dots){
+  const frets = dots.map(d=>d.fret);
+  return {min: Math.min(...frets), max: Math.max(...frets)};
+}
+
+// ── DISEGNA UNA POSIZIONE ──
+function drawPosition(posLabel, dots, baseFret, root, W=148, H=185, large=false){
+  if(large){ W=260; H=300; }
+  const PL=22, PT=28, PR=8, PB=24;
+  const gw=W-PL-PR, gh=H-PT-PB;
+
+  const {min:minF, max:maxF} = positionRange(dots);
+  const showFrets = Math.max(4, maxF-minF+1);
+  const startF = minF;
+
+  const fg = gw/showFrets;
+  const sg = gh/5;
+  const dr = Math.min(fg*0.40, sg*0.42, large?16:10);
+
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect width="${W}" height="${H}" fill="#0a0a0c" rx="6"/>`;
+
+  // Label posizione in alto
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="${large?11:9}" fill="#55556a" font-family="DM Mono,monospace" letter-spacing="1">${posLabel}</text>`;
+
+  // Nut se startF <= 1
+  if(startF <= 1){
+    s+=`<rect x="${PL}" y="${PT}" width="4" height="${gh}" rx="1.5" fill="#d4a843"/>`;
+  }
+
+  // Tasti verticali
+  for(let f=0;f<=showFrets;f++){
+    const x=PL+f*fg;
+    s+=`<line x1="${x}" y1="${PT}" x2="${x}" y2="${PT+gh}" stroke="#2a2a3a" stroke-width="1.2"/>`;
+  }
+
+  // Corde orizzontali — E bassa in cima (si=0), e acuta in fondo (si=5)
+  for(let si=0;si<6;si++){
+    const y=PT+si*sg;
+    const sw=(large?(1.8-si*0.2):(1.2-si*0.12)).toFixed(2);
+    s+=`<line x1="${PL}" y1="${y}" x2="${PL+gw}" y2="${y}" stroke="#3e3e52" stroke-width="${sw}"/>`;
+  }
+
+  // Numeri tasto sotto
+  for(let f=0;f<showFrets;f++){
+    const fret=startF+f;
+    const x=PL+(f+0.5)*fg;
+    const isMark=[3,5,7,9,12].includes(fret);
+    s+=`<text x="${x}" y="${H-5}" text-anchor="middle" font-size="${large?10:8}" fill="${isMark?'#6666bb':'#333348'}" font-family="DM Mono,monospace" font-weight="${isMark?'600':'400'}">${fret}</text>`;
+  }
+
+  // Etichette corde a sinistra
+  (['E','A','D','G','B','e']).forEach((n,si)=>{
+    const y=PT+si*sg;
+    s+=`<text x="${PL-4}" y="${y+3.5}" text-anchor="end" font-size="${large?10:7}" fill="#44445a" font-family="DM Mono,monospace">${n}</text>`;
+  });
+
+  // Pallini
+  dots.forEach(({si, fret})=>{
+    if(fret<startF || fret>=startF+showFrets+1) return;
+    const x=PL+(fret-startF+0.5)*fg;
+    const y=PT+si*sg;
+    const strOpen=[4,9,2,7,11,4];
+    const noteI=(strOpen[si]+fret)%12;
+    const isR = NOTES[noteI] === root;
+
+    if(isR){
+      s+=`<circle cx="${x}" cy="${y}" r="${dr}" fill="#e8b84b" stroke="#fff5cc" stroke-width="${large?2:1.5}"/>`;
+      s+=`<text x="${x}" y="${y+dr*0.4}" text-anchor="middle" font-size="${(dr*1.1).toFixed(0)}" fill="#0a0a0c" font-family="DM Mono,monospace" font-weight="700">R</text>`;
+    } else {
+      s+=`<circle cx="${x}" cy="${y}" r="${dr*0.88}" fill="#1b6e90" stroke="#4db8e0" stroke-width="${large?1.5:1}"/>`;
+      if(large){
+        const noteName=NOTES[noteI].replace('#','♯');
+        s+=`<text x="${x}" y="${y+dr*0.4}" text-anchor="middle" font-size="${(dr*0.9).toFixed(0)}" fill="#ddf" font-family="DM Mono,monospace">${noteName}</text>`;
+      }
+    }
+  });
+
+  s+='</svg>';
+  return s;
+}
+
+function openScaleModal(key){
+  const d=window._scaleData&&window._scaleData[key];
+  if(!d) return;
+  const {root, name, cat, desc, sn}=d;
+  const cats={basic:'Base',modal:'Modi',penta:'Pentatoniche',exotic:'Esotiche',jazz:'Jazz'};
+  const catColors={basic:'var(--accent)',modal:'var(--accent2)',exotic:'var(--accent3)',jazz:'#9eb0c8',penta:'#7ec896'};
+  const col=catColors[cat]||'var(--accent)';
+  const dispRoot=root.replace('#','♯');
+
+  const pills=sn.map(n=>`<span style="padding:3px 10px;background:${n===root?'rgba(232,184,75,.15)':'var(--surface2)'};border:1px solid ${n===root?'var(--accent)':'var(--border)'};color:${n===root?'var(--accent)':'var(--text2)'};font-size:.82rem">${n.replace('#','♯')}</span>`).join('');
+
+  // Trova il pattern CAGED per questa scala
+  const patKey = SCALE_PATTERN_KEY[name];
+  const pattern = patKey ? CAGED_SCALE_PATTERNS[patKey] : null;
+
+  let posHtml = '';
+
+  if(pattern){
+    window._posData = window._posData || {};
+    const posItems = pattern.positions.map((pos,pi)=>{
+      // Calcola startFret reale per questa tonalità
+      const startFret = findStartFret(root, pos.rootStr, pos.rootOff);
+      // Costruisci dots
+      const dots = [];
+      pos.strings.forEach((offsets, si) => {
+        offsets.forEach(off => {
+          let fret = startFret + off;
+          if(fret > 12) fret -= 12;
+          if(fret < 1)  fret += 12;
+          dots.push({si, fret});
+        });
+      });
+      const pkey = key+'_p'+pi;
+      window._posData[pkey] = {dots, posLabel:pos.name, root, startFret};
+
+      const svg = drawPosition(pos.name, dots, startFret, root, 148, 185, false);
+      return `<div style="text-align:center;cursor:pointer" onclick="openPosModal('${pkey}')">
+        ${svg}
+        <div style="font-size:.58rem;color:var(--text3);letter-spacing:1px;margin-top:3px">INGRANDISCI</div>
+      </div>`;
+    });
+    posHtml = `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:.8rem">${posItems.join('')}</div>`;
+  } else {
+    posHtml = `<div style="color:var(--text3);font-size:.8rem;font-family:'Crimson Pro',serif;padding:.8rem 0">Pattern CAGED non disponibile per questa scala — usa la tastiera completa.</div>`;
+  }
+
+  let h=`<div class="modal-title">${dispRoot} ${name}</div>`;
+  h+=`<div style="margin-bottom:1rem"><span style="font-size:.6rem;letter-spacing:2px;padding:2px 8px;border:1px solid ${col};color:${col}">${cats[cat]||cat}</span></div>`;
+  h+=`<p style="font-family:'Crimson Pro',serif;color:var(--text2);margin-bottom:1.2rem;font-size:.95rem;line-height:1.6">${desc}</p>`;
+  h+=`<div style="font-size:.62rem;letter-spacing:2px;color:var(--text3);margin-bottom:.5rem">NOTE</div>`;
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:1.4rem">${pills}</div>`;
+  if(pattern){
+    h+=`<div style="font-size:.62rem;letter-spacing:2px;color:var(--text3);margin-bottom:.8rem">5 POSIZIONI CAGED · Clicca per ingrandire</div>`;
+  }
+  h+=posHtml;
+  h+=`<div style="display:flex;gap:1.4rem;margin-top:.2rem;font-size:.65rem;color:var(--text3);letter-spacing:1px;flex-wrap:wrap">`;
+  h+=`<span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#e8b84b;margin-right:5px;vertical-align:middle"></span><b style="color:var(--text2)">R</b> = Tonica</span>`;
+  h+=`<span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#1b6e90;border:1.5px solid #4db8e0;margin-right:5px;vertical-align:middle"></span>Note della scala</span>`;
+  h+=`</div>`;
+  h+=`<details style="margin-top:1rem"><summary style="font-size:.62rem;letter-spacing:2px;color:var(--text3);cursor:pointer;outline:none">TASTIERA COMPLETA ▾</summary><div style="overflow-x:auto;margin-top:.6rem">${drawFretboard(sn,root,false)}</div></details>`;
+
+  document.getElementById('modal-content').innerHTML=h;
+  document.getElementById('chord-modal').classList.add('open');
+}
+
+// Modal posizione ingrandita
+function openPosModal(pkey){
+  const d = window._posData && window._posData[pkey];
+  if(!d) return;
+  const {dots, posLabel, root, startFret} = d;
+  const svg = drawPosition(posLabel, dots, startFret, root, 260, 300, true);
+  const mc = document.getElementById('modal-content');
+  const prev = mc.innerHTML;
+
+  let h=`<button onclick="document.getElementById('modal-content').innerHTML=window._prevModalContent" style="background:none;border:none;color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:2px;margin-bottom:1rem">← TORNA ALLE POSIZIONI</button>`;
+  h+=`<div class="modal-title">${posLabel}</div>`;
+  h+=`<div style="font-size:.68rem;color:var(--text3);letter-spacing:2px;margin-bottom:1rem">Tasto iniziale: <span style="color:var(--accent)">${((startFret-1+12)%12)+1}</span></div>`;
+  h+=`<div style="display:flex;justify-content:center">${svg}</div>`;
+  h+=`<div style="display:flex;gap:1.4rem;margin-top:1rem;font-size:.65rem;color:var(--text3);letter-spacing:1px;flex-wrap:wrap">`;
+  h+=`<span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#e8b84b;margin-right:5px;vertical-align:middle"></span><b style="color:var(--text2)">R</b> = Tonica</span>`;
+  h+=`<span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#1b6e90;border:1.5px solid #4db8e0;margin-right:5px;vertical-align:middle"></span>Note con nome</span>`;
+  h+=`</div>`;
+
+  window._prevModalContent = prev;
+  mc.innerHTML = h;
+}
+
+// ── DISEGNA UNA POSIZIONE (box verticale 4 tasti × 6 corde) ──
+function filterScales(cat,btn){
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.scale-card').forEach(c=>{c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';});
+}
+
+// ── GRADI ROMANI ──
+const ROMAN=['I','II','III','IV','V','VI','VII'];
+
+// Ruolo del grado nella tonalità (maggiore e minore)
+const DEG_ROLE_MAJOR={
+  1:'Tonica — riposo e risoluzione',
+  2:'Supertonica — tensione lieve, passaggio',
+  3:'Mediante — colore, raramente usato da solo',
+  4:'Sottodominante — movimento verso la dominante',
+  5:'Dominante — tensione forte, risolve sulla tonica',
+  6:'Sopradominante — relativo minore, malinconia',
+  7:'Sensibile — massima tensione, risolve sul I°',
+};
+const DEG_ROLE_MINOR={
+  1:'Tonica — riposo e risoluzione',
+  2:'Supertonica — accordo diminuito, tensione',
+  3:'Sopradominante — relativo maggiore',
+  4:'Sottodominante — movimento, passaggio',
+  5:'Dominante — tensione verso la tonica',
+  6:'Sopradominante maggiore — luminoso nel minore',
+  7:'Settima abbassata — tipica del minore naturale',
+};
+
+function romanDeg(deg, suf, mode){
+  const r=ROMAN[deg-1]||String(deg);
+  // minore/dim = lowercase
+  const isMinorQuality = suf.startsWith('m')||suf==='dim'||suf==='dim7'||suf==='m7b5';
+  const isDim = suf==='dim'||suf==='dim7'||suf==='m7b5';
+  let label = isMinorQuality ? r.toLowerCase() : r;
+  if(isDim) label += '°';
+  return label;
+}
+
+function degClass(deg){
+  return 'deg-'+ROMAN[deg-1];
+}
+
+// ── ANALYZE CHORDS ──
+let chordsLevel = 'base'; // 'base' | 'full'
+
+function setChordsLevel(level, btn){
+  chordsLevel = level;
+  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  // Se c'è già un risultato, rigenera
+  if(selKey) analyzeChords();
+}
+
+// Ruoli leggibili per il neofita
+const CHORD_ROLE_MAJOR = {
+  1: 'Il punto di partenza e di arrivo — suona come "a casa"',
+  4: 'Crea movimento, porta lontano dalla tonica',
+  5: 'Crea tensione — vuole tornare al I',
+  6: 'Il lato malinconico della tonalità',
+  2: 'Passaggio verso il V, tensione lieve',
+  7: 'Massima tensione, risolve sul I',
+  3: 'Colore morbido, condivide note con I e V',
+};
+const CHORD_ROLE_MINOR = {
+  1: 'Il punto di partenza e di arrivo — cupo e profondo',
+  4: 'Sottodominante minore — scuro e pesante',
+  5: 'Dominante — tensione verso la tonica',
+  6: 'Il lato maggiore del minore — un raggio di luce',
+  2: 'Semidiminuito — tensione intensa',
+  7: 'Settima abbassata — tipica del minore naturale',
+  3: 'Relativo maggiore — suona luminoso nel contesto minore',
+};
+
+// Assegna tier a ogni accordo
+// tier 1: gradi principali (I IV V) con triade base
+// tier 2: gradi secondari (vi ii VII iii) con triade base
+// tier 3: settima e varianti dei gradi principali
+// tier 4: estesi, sus, add, power, dim
+function getTier(deg, suf){
+  const isPlain = suf==='' || suf==='m';
+  const is7 = ['7','maj7','m7','mMaj7','m7b5','dim7'].includes(suf);
+  const isExt = ['9','maj9','m9','add9','6','m6','sus2','sus4','5','dim','aug'].includes(suf) || suf.includes('11') || suf.includes('13');
+
+  if([1,4,5].includes(deg) && isPlain)  return 1;
+  if([6,2,7,3].includes(deg) && isPlain) return 2;
+  if(is7) return 3;
+  return 4;
+}
+
+const TIER_LABELS = {
+  1: { label:'FONDAMENTALI', badge:'tier-1-badge', text:'I pilastri della tonalità — impara questi per primi' },
+  2: { label:'SECONDARI', badge:'tier-2-badge', text:'Completano il giro armonico — molto usati' },
+  3: { label:'SETTIMA & VARIANTI', badge:'tier-3-badge', text:'Aggiungono colore e profondità' },
+  4: { label:'ESTESI & AVANZATI', badge:'tier-4-badge', text:'Per chi vuole esplorare oltre il diatonico' },
+};
+
+function analyzeChords(){
+  if(!selKey){showMsg('chords','Seleziona una tonalità.');return;}
+  const allChords = getChordsForKey(selKey, selMode);
+  const cont = document.getElementById('chords-results');
+  if(!allChords.length){cont.innerHTML=`<div class="empty"><div class="icon">🎸</div><p>Nessun accordo trovato.</p></div>`;return;}
+
+  // Assegna tier e ordina
+  const withTier = allChords.map(c=>({...c, tier: getTier(c.deg, c.suf)}));
+
+  // Ordine gradi per importanza
+  const degOrder = [1,4,5,6,2,7,3];
+  withTier.sort((a,b)=>{
+    if(a.tier !== b.tier) return a.tier - b.tier;
+    const ai = degOrder.indexOf(a.deg); const bi = degOrder.indexOf(b.deg);
+    return (ai===-1?99:ai) - (bi===-1?99:bi);
+  });
+
+  // In BASE mostriamo solo tier 1 e 2 (triadi principali)
+  const toShow = chordsLevel === 'base'
+    ? withTier.filter(c => c.tier <= 2)
+    : withTier;
+
+  const roles = selMode==='major' ? CHORD_ROLE_MAJOR : CHORD_ROLE_MINOR;
+
+  let h = `<div class="finger-legend">
+    <span class="fl-title">Dita:</span>
+    ${Object.entries(FC).map(([n,col])=>{
+      const lb=['Indice','Medio','Anulare','Mignolo'][+n-1];
+      return `<span class="fl-item"><span class="fl-dot" style="background:${col}">${n}</span><span class="fl-lbl">${lb}</span></span>`;
+    }).join('')}
+    <span class="fl-item"><svg width="18" height="18"><circle cx="9" cy="9" r="7" fill="none" stroke="#aaaacc" stroke-width="2"/></svg><span class="fl-lbl">Aperta</span></span>
+    <span class="fl-item"><span style="font-size:14px;color:#cc3333">✕</span><span class="fl-lbl">Silenziata</span></span>
+  </div>`;
+
+  h += `<div class="results-count">${toShow.length} accordi in ${selKey.replace('#','♯')} ${selMode==='major'?'Maggiore':'Minore'}</div>`;
+
+  h += `<div class="chords-grid" id="chords-grid">`;
+
+  let currentTier = 0;
+  toShow.forEach((c, idx)=>{
+    // Inserisci separatore di tier
+    if(c.tier !== currentTier){
+      currentTier = c.tier;
+      const tl = TIER_LABELS[currentTier];
+      h += `<div class="tier-divider"><span>${tl.label}</span></div>`;
+    }
+
+    const vv = getFingering(c.cr, c.suf);
+    const v = vv&&vv.length ? vv[0] : null;
+    const diag = drawChord(v);
+    const pills = c.cn.map(n=>`<span class="cnpill">${n.replace('#','♯')}</span>`).join('');
+    const dRoot = c.cr.replace('#','♯');
+    const safeDesc = c.desc.replace(/'/g,"\\'");
+    const rdeg = romanDeg(c.deg, c.suf, selMode);
+    const dcls = degClass(c.deg);
+    const role = (selMode==='major'?DEG_ROLE_MAJOR:DEG_ROLE_MINOR)[c.deg]||'';
+    const safeRole = role.replace(/'/g,"\\'");
+    const hint = roles[c.deg]||'';
+    const tl = TIER_LABELS[c.tier];
+
+    h += `<div class="chord-card" data-type="${c.type}" data-tier="${c.tier}" style="animation-delay:${idx*.025}s"
+      onclick="openModal('${c.cr}','${c.suf}','${c.name}','${c.type}','${safeDesc}','${rdeg}','${dcls}','${c.deg}','${safeRole}')">
+      <div class="chord-name">${dRoot}${c.suf}<span class="chord-tier-badge ${tl.badge}">${rdeg}</span></div>
+      <div class="chord-type">${c.name}</div>
+      ${diag}
+      <div class="chord-notes-row">${pills}</div>
+      ${hint && c.tier<=2 ? `<div class="chord-role-hint">${hint}</div>` : ''}
+    </div>`;
+  });
+
+  h += `</div>`;
+
+  // Se BASE, mostra un invito al completo
+  if(chordsLevel === 'base'){
+    const hiddenCount = withTier.filter(c=>c.tier>2).length;
+    h += `<div style="text-align:center;padding:1.5rem;color:var(--text3);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:2px">
+      + ${hiddenCount} ACCORDI AVANZATI —
+      <span style="color:var(--accent);cursor:pointer;text-decoration:underline"
+        onclick="setChordsLevel('full',document.getElementById('level-full'))">MOSTRA COMPLETO</span>
+    </div>`;
+  }
+
+  cont.innerHTML = h;
+}
+
+function filterChords(type,btn){
+  document.querySelectorAll('#cfilter .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#chords-grid .chord-card').forEach(c=>{c.style.display=(type==='all'||c.dataset.type===type)?'':'none';});
+}
+
+// ── MODAL ──
+function openModal(root,suf,name,type,desc,rdeg,dcls,deg,role){
+  const vv=getFingering(root,suf);
+  const ri=ni(root);
+  const ch=CHORDS.find(c=>c.suf===suf);
+  const notes=ch?ch.iv.map(i=>NOTES[(ri+i)%12]):[];
+  const dr=root.replace('#','♯');
+  let h=`<div class="modal-title">${dr}${suf}</div>`;
+  h+=`<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap;">`;
+  if(rdeg) h+=`<span class="chord-degree ${dcls}" style="font-size:.72rem">${rdeg} grado</span>`;
+  h+=`<span class="modal-sub" style="margin:0">${name} · ${type}</span></div>`;
+  if(role) h+=`<div style="font-size:.72rem;color:var(--text2);margin-bottom:1rem;padding:.5rem .75rem;background:var(--surface2);border-left:2px solid var(--accent);letter-spacing:.5px">${role}</div>`;
+  h+=`<p style="font-family:'Crimson Pro',serif;color:var(--text2);margin-bottom:1.2rem;font-size:.95rem;line-height:1.6">${desc}</p>`;
+  if(notes.length){
+    h+=`<div style="margin-bottom:1rem"><div style="font-size:.62rem;letter-spacing:2px;color:var(--text3);margin-bottom:.4rem">NOTE</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+    ${notes.map((n,i)=>`<span style="padding:3px 9px;background:${i===0?'rgba(232,184,75,.15)':'var(--surface2)'};border:1px solid ${i===0?'var(--accent)':'var(--border)'};color:${i===0?'var(--accent)':'var(--text2)'};font-size:.78rem">${n.replace('#','♯')}</span>`).join('')}
+    </div></div>`;
+  }
+  if(vv&&vv.length){
+    h+=`<div style="font-size:.62rem;letter-spacing:2px;color:var(--text3);margin-bottom:.6rem">DITEGGIATURE</div>`;
+    h+=`<div class="voicings-grid">`;
+    vv.forEach(voc=>{h+=`<div class="voicing-item"><div class="voicing-lbl">${voc.n}</div>${drawChord(voc,145,172)}</div>`;});
+    h+=`</div>`;
+  }
+  document.getElementById('modal-content').innerHTML=h;
+  document.getElementById('chord-modal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+// PROGRESSIONI
+// ═══════════════════════════════════════════════
+
+// Database progressioni: gradi come [degNumber, suffix]
+// mode: 'major' | 'minor' | 'both'
+const PROGRESSIONS = [
+
+  // ── CLASSICHE / FONDAMENTALI ──
+  { name:'Cadenza Perfetta', genre:'classic', mode:'both',
+    degrees:[[1,''],[4,''],[5,''],[1,'']],
+    desc:'La progressione più fondamentale della musica occidentale. Crea tensione sul V e risolve sulla tonica.',
+    examples:'Bach, Mozart, praticamente tutto il pop'},
+  { name:'Cadenza Autentica', genre:'classic', mode:'both',
+    degrees:[[5,''],[1,'']],
+    desc:'La risoluzione più forte: dominante → tonica. Chiude frasi e brani in modo perentorio.',
+    examples:'Fine di quasi ogni brano classico'},
+  { name:'Cadenza Plagale', genre:'classic', mode:'both',
+    degrees:[[4,''],[1,'']],
+    desc:'La "cadenza amen". Conclusione morbida e spirituale, tipica del gospel e degli inni.',
+    examples:'Inni religiosi, gospel, finali di brani'},
+  { name:'Cadenza Rotta', genre:'classic', mode:'major',
+    degrees:[[5,''],[6,'m']],
+    desc:'Il V non risolve sul I ma sul vi. Sorpresa armonica che evita la conclusione attesa.',
+    examples:'Musica classica, usata per prolungare la tensione'},
+  { name:'I – IV – I – V', genre:'classic', mode:'major',
+    degrees:[[1,''],[4,''],[1,''],[5,'']],
+    desc:'Giro armonico fondamentale. Alterna tonica e sottodominante prima di chiudere sulla dominante.',
+    examples:'Folk tradizionale, canti popolari, country classico'},
+  { name:'I – vi – IV – V', genre:'classic', mode:'major',
+    degrees:[[1,''],[6,'m'],[4,''],[5,'']],
+    desc:'Il "giro degli anni \'50". Romantico e nostalgico, base di centinaia di ballad doo-wop.',
+    examples:'Stand By Me, Earth Angel, Blue Moon, Heart and Soul'},
+  { name:'I – V – IV – V', genre:'classic', mode:'major',
+    degrees:[[1,''],[5,''],[4,''],[5,'']],
+    desc:'Oscillazione tra tonica e dominante con passaggio per la sottodominante. Semplice e funzionale.',
+    examples:'Country, folk, rock semplice'},
+  { name:'Passacaglia (i – VII – VI – V)', genre:'classic', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[5,'']],
+    desc:'Discesa diatonica nel minore. Base di innumerevoli brani barocchi, usata da Bach a Pachelbel.',
+    examples:'Pachelbel Canon (variante), Bach, Purcell'},
+
+  // ── POP ──
+  { name:'I – V – vi – IV', genre:'pop', mode:'major',
+    degrees:[[1,''],[5,''],[6,'m'],[4,'']],
+    desc:'La progressione pop più usata degli ultimi 30 anni. Riconoscibilissima, funziona in ogni tempo e genere.',
+    examples:'Let It Be, No Woman No Cry, Someone Like You, Photograph'},
+  { name:'I – IV – vi – V', genre:'pop', mode:'major',
+    degrees:[[1,''],[4,''],[6,'m'],[5,'']],
+    desc:'Variante con IV al secondo posto. Suono leggermente più aperto e malinconico.',
+    examples:'With or Without You (U2), Africa (Toto)'},
+  { name:'vi – IV – I – V', genre:'pop', mode:'major',
+    degrees:[[6,'m'],[4,''],[1,''],[5,'']],
+    desc:'Il giro I-V-vi-IV che parte dal vi. Più malinconico, parte direttamente dal relativo minore.',
+    examples:'Zombie (Cranberries), Wake Me Up (Avicii), Demons (Imagine Dragons)'},
+  { name:'I – iii – IV – V', genre:'pop', mode:'major',
+    degrees:[[1,''],[3,'m'],[4,''],[5,'']],
+    desc:'Il iii condivide note con I e V creando un movimento fluido. Suono solare e ottimista.',
+    examples:'Don\'t Stop Believin\' (Journey), Brown Eyed Girl, Summer of \'69'},
+  { name:'I – II – IV – I', genre:'pop', mode:'major',
+    degrees:[[1,''],[2,''],[4,''],[1,'']],
+    desc:'Progressione modale con il II maggiore non diatonico. Suono moderno e aperto, pop anni 2000.',
+    examples:'Wonderwall (Oasis), Yellow (Coldplay)'},
+  { name:'I – IV – I – IV', genre:'pop', mode:'major',
+    degrees:[[1,''],[4,''],[1,''],[4,'']],
+    desc:'Oscillazione ipnotica tra tonica e sottodominante. Crea groove senza mai risolvere completamente.',
+    examples:'Molti brani folk, pop minimale, indie'},
+  { name:'I – V – I – IV', genre:'pop', mode:'major',
+    degrees:[[1,''],[5,''],[1,''],[4,'']],
+    desc:'Variante semplificata del giro classico. Suono diretto e immediato.',
+    examples:'Country pop, folk moderno'},
+  { name:'IV – I – V – vi', genre:'pop', mode:'major',
+    degrees:[[4,''],[1,''],[5,''],[6,'m']],
+    desc:'Il giro I-V-vi-IV che parte dal IV. Stesso pool di accordi, energia diversa.',
+    examples:'Let Her Go (Passenger), molti brani pop ballad'},
+  { name:'I – IV – V – vi', genre:'pop', mode:'major',
+    degrees:[[1,''],[4,''],[5,''],[6,'m']],
+    desc:'Sale per gradi e poi cade sul relativo minore. Ottimo per brani con energia crescente.',
+    examples:'Pop moderno, EDM con elementi melodici'},
+  { name:'vi – I – V – IV', genre:'pop', mode:'major',
+    degrees:[[6,'m'],[1,''],[5,''],[4,'']],
+    desc:'Parte dal minore relativo e scorre verso la sottodominante. Malinconico ma risolto.',
+    examples:'Indie pop, singer-songwriter moderno'},
+  { name:'i – VII – VI – VII', genre:'pop', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[7,'']],
+    desc:'Giro minore che oscilla tra il VI e VII. Suono cinematico e moderno, molto usato nell\'EDM.',
+    examples:'Billie Eilish, pop dark moderno, colonne sonore'},
+  { name:'i – VI – III – VII', genre:'pop', mode:'minor',
+    degrees:[[1,'m'],[6,''],[3,''],[7,'']],
+    desc:'Giro minore con accordi maggiori sui gradi relativi. Malinconico ma con luce interiore.',
+    examples:'Hurt (NIN/Cash), Mad World, Creep (Radiohead)'},
+  { name:'i – v – VI – III', genre:'pop', mode:'minor',
+    degrees:[[1,'m'],[5,'m'],[6,''],[3,'']],
+    desc:'Versione tutta diatonica del giro minore. Il v minore (non dominante) dà un suono più modale.',
+    examples:'Musica modale, folk nordico, pop scandinavo'},
+
+  // ── ROCK ──
+  { name:'I – IV – V', genre:'rock', mode:'major',
+    degrees:[[1,''],[4,''],[5,'']],
+    desc:'Il giro rock fondamentale. Tre accordi, infinite canzoni. Diretto, energico, universale.',
+    examples:'La Bamba, Twist and Shout, Johnny B. Goode, Louie Louie'},
+  { name:'I – IV – V – IV', genre:'rock', mode:'major',
+    degrees:[[1,''],[4,''],[5,''],[4,'']],
+    desc:'Aggiunge il ritorno al IV prima di ripetere. Più rotondo e fluido del semplice I-IV-V.',
+    examples:'Rock classico anni \'60-\'70, country rock'},
+  { name:'I – VII♭ – IV', genre:'rock', mode:'major',
+    degrees:[[1,''],[7,''],[4,'']],
+    desc:'Il VII abbassato viene preso dalla scala misolidia. Suono grezzo e potente tipico del southern rock.',
+    examples:'Sweet Home Alabama, Hey Joe, La Grange, All Along the Watchtower'},
+  { name:'I – IV – VII♭ – IV', genre:'rock', mode:'major',
+    degrees:[[1,''],[4,''],[7,''],[4,'']],
+    desc:'Estensione del giro misolidio con doppio passaggio per il IV. Riff-oriented.',
+    examples:'Hard rock anni \'70, molti riff di chitarra'},
+  { name:'i – VII – VI – VII', genre:'rock', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[7,'']],
+    desc:'Giro minore con accordi eoliani. Oscuro e potente, base del rock classico e del metal.',
+    examples:'Stairway to Heaven (parte rock), metal classico'},
+  { name:'i – VI – VII – i', genre:'rock', mode:'minor',
+    degrees:[[1,'m'],[6,''],[7,''],[1,'m']],
+    desc:'Sale dal VI al VII per tornare alla tonica minore. Epico e grandioso.',
+    examples:'Rock progressivo, power metal, colonne sonore action'},
+  { name:'Power Riff I – IV – V', genre:'rock', mode:'both',
+    degrees:[[1,'5'],[4,'5'],[5,'5']],
+    desc:'Il giro del rock con power chord. Nessuna terza = ambiguità tonale perfetta per il distortion.',
+    examples:'Smoke on the Water, Iron Man, praticamente tutto l\'hard rock'},
+  { name:'i – III – VII – IV', genre:'rock', mode:'minor',
+    degrees:[[1,'m'],[3,''],[7,''],[4,'']],
+    desc:'Giro minore con movimento epico verso il IV. Molto comune nel rock alternativo e nel grunge.',
+    examples:'Nirvana, Pearl Jam, rock alternativo anni \'90'},
+  { name:'I – IV – I – V', genre:'rock', mode:'major',
+    degrees:[[1,''],[4,''],[1,''],[5,'']],
+    desc:'Rock semplice con ritorno alla tonica prima della dominante. Groovato e ciclico.',
+    examples:'Classic rock, boogie rock, funk rock'},
+  { name:'i – iv – V – i', genre:'rock', mode:'minor',
+    degrees:[[1,'m'],[4,'m'],[5,''],[1,'m']],
+    desc:'Cadenza minore con iv minore. Il IV minore abbassa la temperatura prima della dominante.',
+    examples:'Rock gottico, doom metal, dark wave'},
+  { name:'I – II♭ – IV – I', genre:'rock', mode:'major',
+    degrees:[[1,''],[2,''],[4,''],[1,'']],
+    desc:'Il II accordo maggiore (non diatonico) crea un effetto di sorpresa. Caratteristico del rock moderno.',
+    examples:'Blink-182, pop punk, alternative rock'},
+
+  // ── BLUES ──
+  { name:'Blues 12 Battute', genre:'blues', mode:'both',
+    degrees:[[1,'7'],[4,'7'],[1,'7'],[5,'7'],[4,'7'],[1,'7']],
+    desc:'La struttura del blues per eccellenza. Tutti e tre i gradi come dominanti settima per massimo feeling.',
+    examples:'Johnny B. Goode, Hound Dog, Pride and Joy, Sweet Home Chicago'},
+  { name:'Quick Change Blues', genre:'blues', mode:'both',
+    degrees:[[1,'7'],[4,'7'],[1,'7'],[5,'7'],[4,'7'],[1,'7']],
+    desc:'Variante con cambio rapido al IV dalla seconda battuta. Tipica del Chicago blues.',
+    examples:'Muddy Waters, Howlin\' Wolf, Chicago blues classico'},
+  { name:'Blues Minore', genre:'blues', mode:'minor',
+    degrees:[[1,'m7'],[4,'m7'],[1,'m7'],[5,'7'],[4,'m7'],[1,'m7']],
+    desc:'Il blues in tonalità minore. Più scuro e drammatico, tipico del blues del Delta.',
+    examples:'The Thrill is Gone (BB King), Born Under a Bad Sign, Stormy Monday'},
+  { name:'Blues Shuffle I – IV', genre:'blues', mode:'both',
+    degrees:[[1,'7'],[4,'7']],
+    desc:'Il blues ridotto ai due accordi fondamentali. Shuffle infinito, groove puro.',
+    examples:'Blues ipnotico, jam session, boogie'},
+  { name:'Turnaround Blues I – VI – ii – V', genre:'blues', mode:'major',
+    degrees:[[1,'7'],[6,'7'],[2,'7'],[5,'7']],
+    desc:'Il turnaround jazzato del blues. Ciclo di quinte che riporta all\'inizio con tensione crescente.',
+    examples:'Fine delle 12 battute blues, jazz blues'},
+  { name:'Blues Texas Shuffle', genre:'blues', mode:'both',
+    degrees:[[1,'7'],[4,'7'],[1,'7'],[1,'7'],[4,'7'],[4,'7'],[1,'7'],[1,'7'],[5,'7'],[4,'7'],[1,'7'],[5,'7']],
+    desc:'La struttura completa del Texas shuffle su 12 battute. Movimentata e carica di groove.',
+    examples:'SRV, Albert King, Texas blues'},
+  { name:'Blues con Cambio Rapido (8 bat.)', genre:'blues', mode:'both',
+    degrees:[[1,'7'],[4,'7'],[1,'7'],[5,'7'],[4,'7'],[1,'7']],
+    desc:'Versione compressa del blues a 8 battute. Più rapida, usata in contesti jazz e swing.',
+    examples:'Jazz blues, be-bop blues'},
+  { name:'I – IV – I – V7 (Rock Blues)', genre:'blues', mode:'major',
+    degrees:[[1,''],[4,''],[1,''],[5,'7']],
+    desc:'Il blues semplificato per il rock. Meno settima nel I, più energia sul V dominante.',
+    examples:'Chuck Berry, early rock and roll, rockabilly'},
+
+  // ── JAZZ ──
+  { name:'ii – V – I Maggiore', genre:'jazz', mode:'major',
+    degrees:[[2,'m7'],[5,'7'],[1,'maj7']],
+    desc:'LA progressione del jazz. Ogni standard la usa. Il ii prepara, il V crea tensione, il I risolve.',
+    examples:'Autumn Leaves, Fly Me to the Moon, All The Things You Are'},
+  { name:'ii – V – i Minore', genre:'jazz', mode:'minor',
+    degrees:[[2,'m7b5'],[5,'7'],[1,'mMaj7']],
+    desc:'La versione minore del ii-V-I. Il semidiminuito e il V7(b9) creano una tensione drammatica.',
+    examples:'Autumn Leaves (sezione minore), Summertime, Lush Life'},
+  { name:'I – VI – ii – V (Turnaround)', genre:'jazz', mode:'major',
+    degrees:[[1,'maj7'],[6,'7'],[2,'m7'],[5,'7']],
+    desc:'Il turnaround jazz per eccellenza. Il VI7 è un accordo secondario che punta al ii.',
+    examples:'Standard jazz, ritournelle di ogni brano'},
+  { name:'iii – VI – ii – V – I', genre:'jazz', mode:'major',
+    degrees:[[3,'m7'],[6,'7'],[2,'m7'],[5,'7'],[1,'maj7']],
+    desc:'Il turnaround esteso. Aggiunge il iii prima del VI per aumentare la tensione cadenzale.',
+    examples:'Standard bebop, Rhythm Changes'},
+  { name:'Rhythm Changes (A)', genre:'jazz', mode:'major',
+    degrees:[[1,'maj7'],[6,'7'],[2,'m7'],[5,'7']],
+    desc:'La progressione di "I Got Rhythm" di Gershwin. Base di decine di standard bebop.',
+    examples:'Anthropology (Parker), Oleo (Rollins), Moose the Mooche'},
+  { name:'Sostituzione di Tritono', genre:'jazz', mode:'major',
+    degrees:[[2,'m7'],[2,'7'],[1,'maj7']],
+    desc:'Il V7 viene sostituito con un accordo a distanza di tritono (♭II7). Movimento cromatico sofisticato.',
+    examples:'Tecnica bebop avanzata, Charlie Parker, Bill Evans'},
+  { name:'Ciclo delle Quinte Jazz', genre:'jazz', mode:'major',
+    degrees:[[3,'7'],[6,'7'],[2,'7'],[5,'7'],[1,'maj7']],
+    desc:'Sequenza di dominanti che si muovono per quinte discendenti. Catena di tensioni e risoluzioni.',
+    examples:'Coltrane changes (variante), Confirmation'},
+  { name:'Coltrane Changes', genre:'jazz', mode:'major',
+    degrees:[[1,'maj7'],[3,'maj7'],[6,'maj7'],[1,'maj7']],
+    desc:'Le sostituzioni di Coltrane: tre accordi a distanza di terza maggiore (simmetria per terze). Armonico e sorprendente.',
+    examples:'Giant Steps (Coltrane), Countdown, Moment\'s Notice'},
+  { name:'Backdoor ii – V – I', genre:'jazz', mode:'major',
+    degrees:[[4,'m7'],[7,'7'],[1,'maj7']],
+    desc:'Il ii-V-I "backdoor": usa il iv minore e il VII7 per arrivare alla tonica. Suono modale e inaspettato.',
+    examples:'Jazz avanzato, arrangiamenti moderni'},
+  { name:'Modal Jazz (I – II)', genre:'jazz', mode:'major',
+    degrees:[[1,'maj7'],[2,'m7']],
+    desc:'Il jazz modale: due accordi, groove e improvvisazione. Nessuna risoluzione, solo colore.',
+    examples:'So What (Miles Davis), Impressions (Coltrane)'},
+  { name:'ii – V – I con Subst. Minore', genre:'jazz', mode:'minor',
+    degrees:[[2,'m7b5'],[2,'7'],[1,'m7']],
+    desc:'Versione moderna del ii-V-i con sostituzione di tritono sul V. Colore cromatico intenso.',
+    examples:'Jazz moderno, neo-soul armonico'},
+  { name:'I – IV – iii – VI – ii – V', genre:'jazz', mode:'major',
+    degrees:[[1,'maj7'],[4,'maj7'],[3,'m7'],[6,'7'],[2,'m7'],[5,'7']],
+    desc:'Progressione jazz estesa che percorre l\'intera tonalità prima di tornare al ii-V-I.',
+    examples:'Standard jazz complessi, arrangiamenti orchestrali'},
+  { name:'Jazz Blues (F Jazz)', genre:'jazz', mode:'major',
+    degrees:[[1,'7'],[4,'7'],[1,'7'],[1,'7'],[4,'7'],[4,'m7'],[1,'7'],[6,'7'],[2,'m7'],[5,'7'],[1,'7'],[5,'7']],
+    desc:'Il blues jazzato su 12 battute con sostituzioni cromatiche. Il iv minore al 6° grado è la firma.',
+    examples:'Billie\'s Bounce (Parker), Tenor Madness (Rollins)'},
+
+  // ── SOUL / R&B / FUNK ──
+  { name:'Soul I7 – IV7', genre:'soul', mode:'major',
+    degrees:[[1,'7'],[4,'7']],
+    desc:'Due dominanti che si alternano. Il I7 non risolve mai, creando una tensione funk perpetua.',
+    examples:'Super Freak (Rick James), I Got You (James Brown), Superstition'},
+  { name:'i – IV7 (Funk Groove)', genre:'soul', mode:'minor',
+    degrees:[[1,'m7'],[4,'7']],
+    desc:'Tonica minore contro una sottodominante dominante. Tensione funk che non si risolve mai.',
+    examples:'Funkadelic, Sly Stone, Stevie Wonder'},
+  { name:'I – iii – IV – iii', genre:'soul', mode:'major',
+    degrees:[[1,''],[3,'m'],[4,''],[3,'m']],
+    desc:'Il iii come accordo pivot tra I e IV. Movimento morbido e cantabile tipico del soul.',
+    examples:'Soul classico anni \'60, Motown, ballatone R&B'},
+  { name:'I – IV – vi – iii', genre:'soul', mode:'major',
+    degrees:[[1,''],[4,''],[6,'m'],[3,'m']],
+    desc:'Scende per gradi verso il iii. Malinconico e caldo, tipico delle ballad soul.',
+    examples:'R&B classico, neo-soul, Alicia Keys'},
+  { name:'i – III – VI – VII (Neo-Soul)', genre:'soul', mode:'minor',
+    degrees:[[1,'m7'],[3,'maj7'],[6,'maj7'],[7,'7']],
+    desc:'Il giro neo-soul per eccellenza. Accordi estesi e ricchi di colore, movimento morbido.',
+    examples:'D\'Angelo, Erykah Badu, Frank Ocean, H.E.R.'},
+  { name:'I – IV – ii – V (Soul Ballad)', genre:'soul', mode:'major',
+    degrees:[[1,'maj7'],[4,'maj7'],[2,'m7'],[5,'7']],
+    desc:'Ballad soul con accordi di settima. Fluido e romantico, tipico delle power ballad anni \'70.',
+    examples:'Earth Wind & Fire, Stevie Wonder, Marvin Gaye'},
+  { name:'ii – V – I – VI (Smooth R&B)', genre:'soul', mode:'major',
+    degrees:[[2,'m7'],[5,'7'],[1,'maj7'],[6,'m7']],
+    desc:'Il turnaround jazzato del R&B. Liscio e raffinato, con il VI come punto di riposo.',
+    examples:'Smooth R&B anni \'90, Luther Vandross, Babyface'},
+
+  // ── REGGAE / SKA ──
+  { name:'I – IV – V (Reggae)', genre:'reggae', mode:'major',
+    degrees:[[1,''],[4,''],[5,'']],
+    desc:'Il giro reggae fondamentale suonato con lo skank sul controtempo. Ritmo e groove ipnotici.',
+    examples:'Bob Marley, The Wailers, classic reggae'},
+  { name:'i – VII – VI – V (Reggae Minore)', genre:'reggae', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[5,'']],
+    desc:'Discesa minore reggae. Scuro e groovato, tipico del roots reggae e del dancehall.',
+    examples:'Roots reggae, dancehall, dub'},
+  { name:'I – IV – I – V (Ska)', genre:'reggae', mode:'major',
+    degrees:[[1,''],[4,''],[1,''],[5,'']],
+    desc:'Il giro ska classico suonato veloce con accordi staccati sul secondo e quarto tempo.',
+    examples:'The Specials, Madness, ska tradizionale giamaicano'},
+
+  // ── LATIN / BOSSA ──
+  { name:'ii – V – I (Bossa Nova)', genre:'latin', mode:'major',
+    degrees:[[2,'m7'],[5,'7'],[1,'maj7']],
+    desc:'Il ii-V-I del jazz suonato con ritmo bossa nova. Voicing estesi e tensioni non risolte.',
+    examples:'The Girl From Ipanema, Corcovado, Wave'},
+  { name:'I – VI – ii – V (Bossa Loop)', genre:'latin', mode:'major',
+    degrees:[[1,'maj7'],[6,'m7'],[2,'m7'],[5,'7']],
+    desc:'Il turnaround jazz-bossa. Ciclico e raffinato, perfetto per il ritmo dell\'ipanema.',
+    examples:'João Gilberto, Antônio Carlos Jobim'},
+  { name:'i – IV – VII – III (Flamenco)', genre:'latin', mode:'minor',
+    degrees:[[1,'m'],[4,'m'],[7,''],[3,'']],
+    desc:'Progressione flamenca che sfrutta i gradi del modo frigio. Passionale e drammatica.',
+    examples:'Flamenco classico, chitarra spagnola, Phrygian cadence'},
+  { name:'I – II – V – I (Samba)', genre:'latin', mode:'major',
+    degrees:[[1,'maj7'],[2,'7'],[5,'7'],[1,'maj7']],
+    desc:'La progressione samba con accordo di dominante secondaria sul II. Festosa e ritmica.',
+    examples:'Samba brasiliana, carnevale, musica tropicale'},
+
+  // ── ESOTICHE / MODALI ──
+  { name:'Progressione Andalusa', genre:'exotic', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[5,'']],
+    desc:'La discesa andalusa. Scende per gradi dal i al V usando accordi del frigio. Iconico.',
+    examples:'Stairway to Heaven (intro), Hit the Road Jack, Sultans of Swing'},
+  { name:'Sequenza Frigia', genre:'exotic', mode:'minor',
+    degrees:[[1,'m'],[2,''],[1,'m'],[2,'']],
+    desc:'Alternanza tra i minore e II maggiore (accordo frigio). Tensione esotica ibero-orientale.',
+    examples:'White Stripes - Seven Nation Army, metal moderno, flamenco'},
+  { name:'Giro Napoletano', genre:'exotic', mode:'minor',
+    degrees:[[1,'m'],[2,''],[5,'7'],[1,'m']],
+    desc:'Il ♭II maggiore (accordo napoletano) aggiunge colore drammatico prima del V7.',
+    examples:'Romanticismo musicale, metal sinfonico, dark opera'},
+  { name:'Cambio Modale i – I', genre:'exotic', mode:'minor',
+    degrees:[[1,'m'],[1,'']],
+    desc:'Alternanza tra tonica minore e maggiore. Ambiguità tonale e sorpresa continua.',
+    examples:'Riders on the Storm (Doors), Comfortably Numb (Pink Floyd)'},
+  { name:'Accordi di Passaggio Cromatici', genre:'exotic', mode:'major',
+    degrees:[[1,''],[3,'m'],[3,''],[4,'']],
+    desc:'Il III maggiore crea movimento cromatico verso il IV. Jazz e soul con influenze gospel.',
+    examples:'Georgia On My Mind, soul e R&B classico'},
+  { name:'Medianti Cromatiche (I – III)', genre:'exotic', mode:'major',
+    degrees:[[1,''],[3,''],[1,''],[3,'']],
+    desc:'Alternanza tra I e III maggiore (mediant relationship). Suono romantico e cinematico.',
+    examples:'Film scores, John Williams, Hans Zimmer'},
+  { name:'Medianti per Terze (I – VI♭ – IV♭)', genre:'exotic', mode:'major',
+    degrees:[[1,''],[6,''],[4,''],[1,'']],
+    desc:'Movimento per terze cromatiche. Onirico e sospeso, tipico della musica da film moderna.',
+    examples:'Colonne sonore fantasy, progressive rock'},
+  { name:'Catena di Dominanti (V/V – V – I)', genre:'exotic', mode:'major',
+    degrees:[[2,'7'],[5,'7'],[1,'']],
+    desc:'La dominante secondaria V/V (II7) prepara il V che risolve sul I. Tensione doppia.',
+    examples:'Musica classica, jazz, gospel'},
+  { name:'Progressione Dorica (i – IV)', genre:'exotic', mode:'minor',
+    degrees:[[1,'m'],[4,'']],
+    desc:'Il IV maggiore nel minore (caratteristico del modo dorico). Suono jazz-modale e funky.',
+    examples:'So What (Miles Davis), Eleanor Rigby, Oye Como Va (Santana)'},
+  { name:'Progressione Lidia (I – II)', genre:'exotic', mode:'major',
+    degrees:[[1,'maj7'],[2,'maj7']],
+    desc:'Il II maggiore diatonico del modo lidio. Sognante e levitante, tipico del film score.',
+    examples:'Back to the Future, musica di John Williams, dream pop'},
+
+  // ── METAL / HARD ROCK ──
+  { name:'Power Riff i – VI – VII', genre:'metal', mode:'minor',
+    degrees:[[1,'5'],[6,'5'],[7,'5']],
+    desc:'Tre power chord in discesa eoliana. Pesante e diretto, base di migliaia di riff metal.',
+    examples:'Metallica, Rammstein, metal classico'},
+  { name:'i – VII – VI – V (Metal)', genre:'metal', mode:'minor',
+    degrees:[[1,'m'],[7,''],[6,''],[5,'']],
+    desc:'La discesa minore del metal. Oscura e epica, perfetta per intro lente e breakdown.',
+    examples:'Dio, Sabbath, power metal classico'},
+  { name:'i – II♭ – VII♭ – i', genre:'metal', mode:'minor',
+    degrees:[[1,'m'],[2,''],[7,''],[1,'m']],
+    desc:'Il ♭II (accordo frigio/napoletano) nel metal. Pesantezza e oscurità massima.',
+    examples:'Death metal, doom metal, Slayer'},
+  { name:'i – V – VI – III – VII – IV – I – VII', genre:'metal', mode:'minor',
+    degrees:[[1,'m'],[5,''],[6,''],[3,''],[7,''],[4,''],[1,''],[7,'']],
+    desc:'Il "giro canonico" del metal progressivo. Otto accordi che salgono e scendono drammaticamente.',
+    examples:'Metal progressivo, Dream Theater, Symphony X'},
+  { name:'Riff Pentatonico i – III – IV', genre:'metal', mode:'minor',
+    degrees:[[1,'m'],[3,''],[4,'']],
+    desc:'Tre accordi basati sulla pentatonica minore. Diretto, energico, adatto al palm-muting.',
+    examples:'Hard rock, grunge, post-grunge'},
+
+  // ── COUNTRY ──
+  { name:'I – IV – V – I (Country)', genre:'country', mode:'major',
+    degrees:[[1,''],[4,''],[5,''],[1,'']],
+    desc:'Il giro country per eccellenza. Tre accordi, milioni di brani. Semplice e universale.',
+    examples:'Hank Williams, Johnny Cash, classic country'},
+  { name:'I – I7 – IV – iv – I – V – I', genre:'country', mode:'major',
+    degrees:[[1,''],[1,'7'],[4,''],[4,'m'],[1,''],[5,''],[1,'']],
+    desc:'Il giro country con il IV minore di passaggio. Il I7 anticipa il IV con movimento dominante.',
+    examples:'Country blues, outlaw country, americana'},
+  { name:'I – ii – IV – V (Country Pop)', genre:'country', mode:'major',
+    degrees:[[1,''],[2,'m'],[4,''],[5,'']],
+    desc:'Versione moderna del country con il ii minore. Suono più sofisticato del classico I-IV-V.',
+    examples:'Country pop moderno, Nashville sound'},
+
+  // ── AMBIENT / FILM SCORE ──
+  { name:'I – V – vi – iii (Arpeggio)', genre:'film', mode:'major',
+    degrees:[[1,''],[5,''],[6,'m'],[3,'m']],
+    desc:'Il giro cinematico per eccellenza. Movimentato verso il basso, evoca nostalgia e viaggio.',
+    examples:'Canon di Pachelbel, innumerevoli colonne sonore'},
+  { name:'i – VI – III – VII (Epico)', genre:'film', mode:'minor',
+    degrees:[[1,'m'],[6,''],[3,''],[7,'']],
+    desc:'Il giro epico-cinematico. Salita emotiva verso il VII, usatissimo nei trailer e nelle colonne sonore.',
+    examples:'Trailer film, Hans Zimmer, Two Steps from Hell'},
+  { name:'I – IV – vi – V (Drammatico)', genre:'film', mode:'major',
+    degrees:[[1,''],[4,''],[6,'m'],[5,'']],
+    desc:'Giro cinematico con caduta emotiva sul vi. Usato per momenti drammatici e rivelazioni.',
+    examples:'Colonne sonore drammatiche, serie TV'},
+  { name:'i – VII – III – VI (Circolare)', genre:'film', mode:'minor',
+    degrees:[[1,'m'],[7,''],[3,''],[6,'']],
+    desc:'Loop circolare minore che sale di terze. Onirico e senza risoluzione, perfetto per atmosfere.',
+    examples:'Ambient cinematico, musica per videogiochi'},
+  { name:'I – ♭VII – ♭VI – ♭VII (Drone)', genre:'film', mode:'major',
+    degrees:[[1,''],[7,''],[6,''],[7,'']],
+    desc:'Oscillazione su accordi abbassati con la tonica come drone. Psichedelico e ipnotico.',
+    examples:'Pink Floyd, psichedelia, shoegaze, drone rock'},
+
+];
+
+
+
+// Colori per i gradi nelle chips
+const DEG_CHIP_COLORS={
+  1:{bg:'rgba(232,184,75,.15)',border:'rgba(232,184,75,.5)',text:'#e8b84b'},
+  2:{bg:'rgba(75,188,232,.1)', border:'rgba(75,188,232,.4)',text:'#4bbce8'},
+  3:{bg:'rgba(75,188,232,.1)', border:'rgba(75,188,232,.4)',text:'#4bbce8'},
+  4:{bg:'rgba(78,200,120,.1)', border:'rgba(78,200,120,.4)',text:'#4ec878'},
+  5:{bg:'rgba(232,130,75,.15)',border:'rgba(232,130,75,.5)',text:'#e8824b'},
+  6:{bg:'rgba(75,188,232,.1)', border:'rgba(75,188,232,.4)',text:'#4bbce8'},
+  7:{bg:'rgba(180,75,232,.1)', border:'rgba(180,75,232,.4)',text:'#b44be8'},
+};
+
+let selProgKey=null, selProgMode='major';
+
+function selectProgMode(mode){
+  selProgMode=mode;
+  document.getElementById('prog-mode-major').classList.toggle('sel',mode==='major');
+  document.getElementById('prog-mode-minor').classList.toggle('sel',mode==='minor');
+  if(selProgKey) document.getElementById('sd-prog').textContent=`Tonalità: ${selProgKey.replace('#','♯')} ${mode==='major'?'Maggiore':'Minore'}`;
+}
+
+// Risolve un grado in accordo reale data la tonalità
+function resolveChord(root, degNum, suf, mode){
+  const ri=ni(root);
+  const formula=mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
+  const degIdx=degNum-1;
+  if(degIdx<0||degIdx>=formula.length) return null;
+  const chordRoot=NOTES[(ri+formula[degIdx])%12];
+  return {root:chordRoot, suf};
+}
+
+function analyzeProgressions(){
+  if(!selProgKey){showMsg('prog','Seleziona una tonalità.');return;}
+  const cont=document.getElementById('prog-results');
+
+  const filtered=PROGRESSIONS.filter(p=>p.mode==='both'||p.mode===selProgMode);
+
+  const genres={
+    classic:'Classica',pop:'Pop',rock:'Rock',blues:'Blues',jazz:'Jazz',
+    soul:'Soul / R&B / Funk',reggae:'Reggae / Ska',latin:'Latin / Bossa',
+    metal:'Metal',country:'Country',film:'Film Score / Ambient',exotic:'Esotiche & Modali'
+  };
+  const genreOrder=['classic','pop','rock','blues','jazz','soul','reggae','latin','metal','country','film','exotic'];
+
+  const byGenre={};
+  filtered.forEach(p=>{
+    if(!byGenre[p.genre]) byGenre[p.genre]=[];
+    byGenre[p.genre].push(p);
+  });
+
+  let h=`<div class="results-count">${filtered.length} progressioni per ${selProgKey.replace('#','♯')} ${selProgMode==='major'?'Maggiore':'Minore'}</div>`;
+  h+=`<div class="prog-genre-tabs filter-tabs">
+    <button class="ftab active" onclick="filterProg('all',this)">Tutte (${filtered.length})</button>`;
+  genreOrder.forEach(g=>{
+    if(byGenre[g]) h+=`<button class="ftab" onclick="filterProg('${g}',this)">${genres[g]} (${byGenre[g].length})</button>`;
+  });
+  h+='</div>';
+
+  let cardIdx=0;
+  genreOrder.forEach(genre=>{
+    if(!byGenre[genre]) return;
+    h+=`<div class="prog-section-title" data-genre="${genre}">${genres[genre]}</div>`;
+    h+=`<div class="prog-grid" data-genre="${genre}">`;
+
+    byGenre[genre].forEach(prog=>{
+      const resolvedChords=prog.degrees.map(([deg,suf])=>resolveChord(selProgKey,deg,suf,selProgMode));
+
+      const degChips=prog.degrees.map(([deg,suf])=>{
+        const label=romanDeg(deg,suf,selProgMode);
+        const col=DEG_CHIP_COLORS[deg]||DEG_CHIP_COLORS[1];
+        return `<span class="prog-deg-chip" style="background:${col.bg};border-color:${col.border};color:${col.text}">${label}</span>`;
+      }).join('<span class="prog-arrow">→</span>');
+
+      const diagsHtml=resolvedChords.map((ch,i)=>{
+        if(!ch) return '';
+        const vv=getFingering(ch.root,ch.suf);
+        const v=vv&&vv.length?vv[0]:null;
+        const diag=drawChord(v,130,155);
+        const dispRoot=ch.root.replace('#','♯');
+        return `<div class="prog-chord-item">
+          <div class="prog-chord-label">${dispRoot}${ch.suf}</div>
+          ${diag}
+        </div>`;
+      }).join('');
+
+      const delay=(cardIdx++)*0.03;
+      h+=`<div class="prog-card" data-genre="${genre}" style="animation-delay:${delay}s">
+        <div class="prog-card-header">
+          <div class="prog-name">${prog.name}</div>
+          <span class="prog-genre-badge genre-${genre}">${genres[genre]}</span>
+        </div>
+        <div class="prog-degrees">${degChips}</div>
+        <div class="prog-chords-row">${diagsHtml}</div>
+        <div class="prog-desc">${prog.desc}</div>
+        <div class="prog-examples">Esempi: <span>${prog.examples}</span></div>
+      </div>`;
+    });
+
+    h+='</div>';
+  });
+
+  cont.innerHTML=h;
+}
+
+function filterProg(genre,btn){
+  document.querySelectorAll('.prog-genre-tabs .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.prog-section-title,.prog-grid').forEach(el=>{
+    if(genre==='all'||el.dataset.genre===genre) el.style.display='';
+    else el.style.display='none';
+  });
+}
+
+function initProgKeyRow(){
+  const kr=document.getElementById('key-row-prog');
+  NOTES.forEach((n,i)=>{
+    const b=document.createElement('button');
+    b.className='key-btn'; b.dataset.note=n;
+    const main=n.includes('#')?n.replace('#','♯'):n;
+    const altHtml=NOTE_ALT[i]?`<span class="ka">${NOTE_ALT[i]}</span>`:'';
+    b.innerHTML=`<span class="km">${main}</span>${altHtml}`;
+    b.onclick=()=>{
+      document.querySelectorAll('#key-row-prog .key-btn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); selProgKey=n;
+      document.getElementById('sd-prog').textContent=`Tonalità: ${n.replace('#','♯')} ${selProgMode==='major'?'Maggiore':'Minore'}`;
+    };
+    kr.appendChild(b);
+  });
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('chord-modal'))
+    document.getElementById('chord-modal').classList.remove('open');
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function showMsg(page,msg){
+  document.getElementById(page+'-results').innerHTML=`<div class="empty"><p>${msg}</p></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// METRONOMO — AudioContext, scheduling preciso
+// ═══════════════════════════════════════════════════════════
+(function(){
+  let audioCtx = null;
+  let bpm = 120;
+  let meter = 4;
+  let isPlaying = false;
+  let currentBeat = 0;
+  let nextBeatTime = 0;
+  let schedulerTimer = null;
+  let tapTimes = [];
+
+  const LOOK_AHEAD = 0.1;   // secondi: quanto in anticipo scheduliamo
+  const SCHEDULE_INTERVAL = 25; // ms: quanto spesso gira lo scheduler
+
+  // Labels tempo per BPM
+  const TEMPO_LABELS = [
+    [20,  'Larghissimo'],
+    [25,  'Grave'],
+    [40,  'Largo'],
+    [45,  'Lento'],
+    [52,  'Larghetto'],
+    [58,  'Adagio'],
+    [63,  'Adagietto'],
+    [66,  'Andante'],
+    [72,  'Andante moderato'],
+    [76,  'Andantino'],
+    [84,  'Tranquillo'],
+    [88,  'Moderato'],
+    [96,  'Allegretto moderato'],
+    [104, 'Allegretto'],
+    [112, 'Animato'],
+    [120, 'Allegro moderato'],
+    [132, 'Allegro'],
+    [140, 'Allegro assai'],
+    [152, 'Allegro vivace'],
+    [160, 'Vivace'],
+    [168, 'Vivacissimo'],
+    [176, 'Allegrissimo'],
+    [184, 'Presto'],
+    [200, 'Presto assai'],
+    [210, 'Prestissimo'],
+    [240, 'Prestissimo assai'],
+    [280, 'Velocissimo'],
+  ];
+
+  function getTempoLabel(b){
+    for(let i=TEMPO_LABELS.length-1;i>=0;i--){
+      if(b>=TEMPO_LABELS[i][0]) return TEMPO_LABELS[i][1];
+    }
+    return 'Larghissimo';
+  }
+
+  function initAudio(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }
+
+  function scheduleClick(time, isAccent){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.frequency.value = isAccent ? 1100 : 880;
+    gain.gain.setValueAtTime(isAccent ? 0.7 : 0.45, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + (isAccent ? 0.06 : 0.04));
+
+    osc.start(time);
+    osc.stop(time + 0.08);
+  }
+
+  // Queue di beat da visualizzare
+  const visualQueue = [];
+
+  function scheduler(){
+    while(nextBeatTime < audioCtx.currentTime + LOOK_AHEAD){
+      scheduleClick(nextBeatTime, currentBeat === 0);
+      visualQueue.push({beat: currentBeat, time: nextBeatTime});
+      currentBeat = (currentBeat + 1) % meter;
+      nextBeatTime += 60 / bpm;
+    }
+  }
+
+  function draw(){
+    if(!isPlaying) return;
+    const now = audioCtx.currentTime;
+    while(visualQueue.length && visualQueue[0].time < now){
+      const {beat} = visualQueue.shift();
+      highlightBeat(beat);
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function highlightBeat(beat){
+    const beats = document.querySelectorAll('.metro-beat');
+    beats.forEach((b,i)=>{
+      b.classList.toggle('active', i===beat);
+    });
+  }
+
+  function buildBeats(){
+    const container = document.getElementById('metro-beats');
+    if(!container) return;
+    container.innerHTML = '';
+    for(let i=0;i<meter;i++){
+      const d = document.createElement('div');
+      d.className = 'metro-beat' + (i===0?' accent':'');
+      container.appendChild(d);
+    }
+  }
+
+  function updateUI(){
+    const bpmDisplay = document.getElementById('metro-bpm-display');
+    const bpmInput   = document.getElementById('metro-bpm-input');
+    const slider     = document.getElementById('metro-slider');
+    const label      = document.getElementById('metro-tempo-label');
+    if(bpmDisplay) bpmDisplay.textContent = bpm;
+    if(bpmInput)   bpmInput.value = bpm;
+    if(slider)     slider.value = bpm;
+    if(label)      label.textContent = getTempoLabel(bpm);
+  }
+
+  function setBpm(val){
+    bpm = Math.max(20, Math.min(300, Math.round(val)));
+    updateUI();
+  }
+
+  window.metroBpmFromSlider = function(val){ setBpm(+val); };
+  window.metroBpmFromInput  = function(val){
+    const v = parseInt(val);
+    if(!isNaN(v)) setBpm(v);
+  };
+
+  window.metroSetMeter = function(m, btn){
+    meter = m;
+    document.querySelectorAll('.metro-meter-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+    buildBeats();
+    // Reset beat position se in play
+    if(isPlaying) currentBeat = 0;
+  };
+
+  window.metroToggle = function(){
+    initAudio();
+    const btn = document.getElementById('metro-play-btn');
+    if(isPlaying){
+      // STOP
+      isPlaying = false;
+      clearInterval(schedulerTimer);
+      schedulerTimer = null;
+      document.querySelectorAll('.metro-beat').forEach(b=>b.classList.remove('active'));
+      btn.textContent = 'START';
+      btn.classList.remove('playing');
+    } else {
+      // START
+      isPlaying = true;
+      currentBeat = 0;
+      nextBeatTime = audioCtx.currentTime + 0.05;
+      schedulerTimer = setInterval(scheduler, SCHEDULE_INTERVAL);
+      requestAnimationFrame(draw);
+      btn.textContent = 'STOP';
+      btn.classList.add('playing');
+    }
+  };
+
+  window.metroTap = function(){
+    const now = performance.now();
+    tapTimes.push(now);
+    // Tieni solo gli ultimi 8 tap e quelli entro 3 secondi
+    tapTimes = tapTimes.filter(t=>now-t<3000).slice(-8);
+    if(tapTimes.length >= 2){
+      const intervals = [];
+      for(let i=1;i<tapTimes.length;i++)
+        intervals.push(tapTimes[i]-tapTimes[i-1]);
+      const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
+      setBpm(60000/avg);
+    }
+  };
+
+  // Init
+  document.addEventListener('DOMContentLoaded', ()=>{
+    buildBeats();
+    // Seleziona 4/4 di default
+    const m4 = document.getElementById('metro-meter-4');
+    if(m4) m4.classList.add('sel');
+    updateUI();
+  });
+
+})();
+
+initGrids();
+initProgKeyRow();
+
+// PWA — Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+
+<!-- INFO PAGE -->
+<div class="page" id="page-info">
+  <div class="info-page">
+    <span class="info-eyebrow">MEM Software · 2026</span>
+    <div class="info-hero-title">CHORDA</div>
+    <div class="info-hero-sub">Uno strumento per chitarristi. Accordi, progressioni, ritmo — tutto in una pagina.</div>
+
+    <div class="info-section">
+      <span class="info-section-label">Il progetto</span>
+      <div class="info-section-title">COSA È CHORDA</div>
+      <p class="info-body">
+        Chorda nasce dall'esigenza di avere a portata di mano un riferimento completo per la teoria applicata alla chitarra, senza distrazioni e senza connessione obbligatoria. È un'applicazione web progressiva — funziona su qualsiasi dispositivo, si installa come app nativa, gira offline.
+      </p>
+      <p class="info-body" style="margin-top:.8rem;">
+        Il progetto copre i tre pilastri pratici dello strumento: la conoscenza degli accordi per tonalità e modo, il linguaggio delle progressioni armoniche nei principali generi musicali, e il senso del tempo attraverso il metronomo integrato.
+      </p>
+    </div>
+
+    <div class="info-feature-grid">
+      <div class="info-feature">
+        <div class="info-feature-icon">𝄞</div>
+        <div class="info-feature-name">ACCORDI</div>
+        <div class="info-feature-desc">Tutti gli accordi diatonici per qualsiasi tonalità maggiore o minore, con diteggiature e voicings.</div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon">↗</div>
+        <div class="info-feature-name">PROGRESSIONI</div>
+        <div class="info-feature-desc">Progressioni armoniche per oltre 12 generi — dal blues al jazz, dal pop al metal — con esempi e analisi dei gradi.</div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon">◉</div>
+        <div class="info-feature-name">METRONOMO</div>
+        <div class="info-feature-desc">Metronomo di precisione con scheduler audio WebAudio, tap tempo, controllo del metro e feedback visivo.</div>
+      </div>
+      <div class="info-feature">
+        <div class="info-feature-icon">⬡</div>
+        <div class="info-feature-name">OFFLINE-FIRST</div>
+        <div class="info-feature-desc">Nessuna dipendenza da server. Funziona senza connessione, installabile come PWA su qualsiasi piattaforma.</div>
+      </div>
+    </div>
+
+    <div class="info-divider"></div>
+
+    <div class="info-section">
+      <span class="info-section-label">Autore &amp; Publisher</span>
+      <div class="info-section-title">CHI C'È DIETRO</div>
+      <p class="info-body">
+        Chorda è sviluppata da <strong style="color:var(--text)">Alessandro Rocca</strong>, pubblicata sotto il marchio <strong style="color:var(--text)">MEM Software</strong>. MEM Software produce strumenti web personali e professionali — applicazioni a file singolo, veloci, prive di tracker e pensate per durare.
+      </p>
+    </div>
+
+    <div class="info-section">
+      <span class="info-section-label">Licenza &amp; Copyright</span>
+      <div class="info-section-title">DIRITTI E UTILIZZO</div>
+      <div class="info-legal-block">
+        <div class="info-legal-text">
+          <strong>© 2026 Alessandro Rocca · MEM Software. Tutti i diritti riservati.</strong><br><br>
+          Il codice sorgente di questa applicazione, nella sua interezza o in qualsiasi sua parte, non può essere copiato, riprodotto, distribuito, modificato o incorporato in altri prodotti senza esplicita autorizzazione scritta dell'autore.<br><br>
+          L'utilizzo personale e non commerciale dell'applicazione è liberamente consentito. Qualsiasi utilizzo commerciale, redistribuzione o integrazione in prodotti terzi richiede accordo preventivo con MEM Software.<br><br>
+          I contenuti teorici (scale, accordi, progressioni armoniche) sono di dominio pubblico. Il codice, il design e l'interfaccia sono proprietà esclusiva dell'autore.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-meta-row">
+      <div class="info-meta-item">
+        <div class="info-meta-key">Versione</div>
+        <div class="info-meta-val">1.0</div>
+      </div>
+      <div class="info-meta-item">
+        <div class="info-meta-key">Anno</div>
+        <div class="info-meta-val">2026</div>
+      </div>
+      <div class="info-meta-item">
+        <div class="info-meta-key">Autore</div>
+        <div class="info-meta-val">Alessandro Rocca</div>
+      </div>
+      <div class="info-meta-item">
+        <div class="info-meta-key">Publisher</div>
+        <div class="info-meta-val">MEM Software</div>
+      </div>
+      <div class="info-meta-item">
+        <div class="info-meta-key">Piattaforma</div>
+        <div class="info-meta-val">PWA · Web</div>
+      </div>
+    </div>
+
+    <div class="info-mem-badge">MEM Software · <span>Built to last</span></div>
+  </div>
+</div>
+
+</body>
+</html>
