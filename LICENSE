@@ -1,0 +1,114 @@
+CHORDA — PROPRIETARY SOFTWARE LICENSE
+======================================
+
+Copyright (c) 2026 Alessandro Rocca
+Published by MEM Software
+All Rights Reserved.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. DEFINITIONS
+
+"Software" means the Chorda application, including its source code, compiled
+code, HTML, CSS, JavaScript, graphic assets, documentation, and any derivative
+works thereof, whether in whole or in part.
+
+"Author" means Alessandro Rocca, the original creator and copyright holder.
+
+"Publisher" means MEM Software, under whose brand the Software is published.
+
+"User" means any natural or legal person who accesses, installs, views, copies,
+or otherwise interacts with the Software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. GRANT OF RIGHTS — PERMITTED USE
+
+Subject to the terms of this License, the Author grants the User a limited,
+non-exclusive, non-transferable, revocable license to:
+
+  a) Use the Software for personal, non-commercial purposes only;
+  b) Access and run the Software on personal devices.
+
+No other rights are granted, express or implied.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3. RESTRICTIONS — PROHIBITED ACTS
+
+The User shall NOT, without prior written authorization from the Author:
+
+  a) Copy, reproduce, or duplicate the Software or any portion thereof;
+  b) Modify, adapt, translate, reverse-engineer, decompile, or disassemble the
+     Software;
+  c) Create derivative works based on the Software;
+  d) Distribute, publish, sublicense, sell, rent, lease, or transfer the
+     Software or any rights therein to any third party;
+  e) Use the Software, in whole or in part, as a basis or template for any
+     other product, application, or service;
+  f) Remove, alter, or obscure any copyright, trademark, or proprietary notices
+     contained in the Software;
+  g) Use the Software for any commercial purpose, including but not limited to
+     monetized services, SaaS products, or commercial distribution.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4. INTELLECTUAL PROPERTY
+
+The Software, including its design, architecture, source code, and visual
+identity, is the exclusive intellectual property of Alessandro Rocca and is
+protected under:
+
+  — Italian law: Legge 22 aprile 1941, n. 633 (Legge sul Diritto d'Autore),
+    as amended, which explicitly protects software as a work of authorship
+    (art. 1, art. 2 n. 8);
+  — European Union law: Directive 2009/24/EC on the legal protection of
+    computer programs;
+  — International law: the Berne Convention for the Protection of Literary
+    and Artistic Works, to which Italy is a signatory.
+
+The fact that this Software is made publicly accessible via a hosting platform
+(including but not limited to GitHub Pages) does not constitute a waiver of
+any rights, nor does it imply a license to copy, modify, or redistribute.
+
+Music theory content (scales, intervals, chord formulas, harmonic progressions)
+is in the public domain. This exemption does not extend to the code, structure,
+design, or implementation of the Software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. THE AUTHOR SHALL NOT
+BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF
+OR INABILITY TO USE THE SOFTWARE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+6. TERMINATION
+
+This License is effective until terminated. It terminates automatically and
+without notice if the User fails to comply with any term herein. Upon
+termination, the User must cease all use and destroy any copies of the Software
+in their possession.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+7. GOVERNING LAW
+
+This License shall be governed by and construed in accordance with the laws of
+the Italian Republic. Any dispute arising from or relating to this License shall
+be subject to the exclusive jurisdiction of the courts of Genova, Italy.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+8. CONTACT
+
+For licensing inquiries, commercial use requests, or permissions beyond the
+scope of this License, contact the Author via the MEM Software GitHub profile.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copyright (c) 2026 Alessandro Rocca · MEM Software · All Rights Reserved.
