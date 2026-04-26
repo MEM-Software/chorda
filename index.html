@@ -17,6 +17,7 @@
   --accent3:#e8824b;--text:#e8e4dc;--text2:#b0adaa;--text3:#72717a;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+html{overflow-x:hidden;}
 body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,13,15,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;overflow:hidden;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--accent);display:flex;align-items:center;gap:.5rem;flex-shrink:0;}
@@ -141,7 +142,7 @@ nav{display:flex;height:60px;align-items:center;}
 .prog-examples span{color:var(--text2);}
 
 /* ── METRONOME ── */
-.metro-page{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:6rem 1.5rem 3rem;min-height:100vh;gap:2rem;}
+.metro-page{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6rem 1.5rem 3rem;height:calc(100vh - 60px);overflow:hidden;gap:2rem;}
 .metro-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:8px;color:var(--text);text-align:center;}
 .metro-bpm-display{font-family:'Bebas Neue',sans-serif;font-size:7rem;line-height:1;color:var(--accent);letter-spacing:-2px;text-align:center;min-width:240px;}
 .metro-bpm-input{background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:2px;text-align:center;width:120px;padding:.4rem .6rem;outline:none;transition:border-color .2s;}
