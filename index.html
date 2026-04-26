@@ -2151,6 +2151,12 @@ function showMsg(page,msg){
   function initAudio(){
     if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     if(audioCtx.state==='suspended') audioCtx.resume();
+    // iOS richiede un suono silenzioso nello stesso gesto per sbloccare l'AudioContext
+    const buf = audioCtx.createBuffer(1,1,22050);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(audioCtx.destination);
+    src.start(0);
   }
 
   function scheduleClick(time, isAccent){
